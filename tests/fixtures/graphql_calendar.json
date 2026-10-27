@@ -1,0 +1,40 @@
+{
+ "data": {
+  "user": {
+   "contributionsCollection": {
+    "contributionCalendar": {
+     "weeks": [
+      {
+       "contributionDays": [
+        {
+         "date": "2025-10-26",
+         "contributionCount": 0
+        },
+        {
+         "date": "2025-10-27",
+         "contributionCount": 4
+        }
+       ]
+      },
+      {
+       "contributionDays": [
+        {
+         "date": "2025-10-28",
+         "contributionCount": 1
+        },
+        {
+         "date": "2025-10-29",
+         "contributionCount": 0
+        },
+        {
+         "date": "2025-10-30",
+         "contributionCount": 7
+        }
+       ]
+      }
+     ]
+    }
+   }
+  }
+ }
+}
