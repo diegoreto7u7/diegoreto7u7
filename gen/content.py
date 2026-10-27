@@ -149,7 +149,7 @@ COPY: dict[str, dict[str, str]] = {
             "Ficha de personaje. Clase: Backend, visión artificial y datos. "
             "Gremio: Radimer Seguridad, desde 2025. Base: Bilbao. "
             "Origen: pasé por los videojuegos con Unity (300 h) antes de acabar montando pipelines de visión. "
-            "Idiomas y habilidades: Python 29,0 %, TypeScript 28,9 %, C / C++ 20,7 %, Go 5,7 %, PHP 3,6 %, Rust 2,8 %. "
+            "Idiomas: español nativo, inglés B2, euskera B2. Habilidades: Python 29,0 %, TypeScript 28,9 %, C / C++ 20,7 %, Go 5,7 %, PHP 3,6 %, Rust 2,8 %. "
             "EXP {total} contribuciones, {active} de {window} días activos."
         ),
         "alt.achievements": (
@@ -164,7 +164,11 @@ COPY: dict[str, dict[str, str]] = {
         "alt.highscore": (
             "High score: 1UP {total} contribuciones y récord de {best} contribuciones en un día."
         ),
-        "alt.bilbao": "Pixel art del skyline de Bilbao.",
+        "alt.bilbao": (
+            "Bilbao de noche en pixel art, con estrellas que titilan, ventanas encendidas y reflejos en el agua: "
+            "el Guggenheim, el Puppy, el arco rojo del puente de La Salve, la torre Iberdrola, "
+            "el puente Zubizuri, los montes de Artxanda y la ría."
+        ),
     },
     "en": {
         "intro": "**Diego Orue** · Software developer in Bilbao, Spain · Backend, computer vision & data",
@@ -226,7 +230,7 @@ COPY: dict[str, dict[str, str]] = {
             "Character sheet. Class: Backend, computer vision and data. "
             "Guild: Radimer Seguridad, since 2025. Base: Bilbao, Spain. "
             "Origin: I went through game dev with Unity (300 h) before ending up building vision pipelines. "
-            "Languages and skills: Python 29.0%, TypeScript 28.9%, C / C++ 20.7%, Go 5.7%, PHP 3.6%, Rust 2.8%. "
+            "Languages: Spanish (native), English (B2), Basque (B2). Skills: Python 29.0%, TypeScript 28.9%, C / C++ 20.7%, Go 5.7%, PHP 3.6%, Rust 2.8%. "
             "EXP {total} contributions, {active} of {window} days active."
         ),
         "alt.achievements": (
@@ -241,7 +245,11 @@ COPY: dict[str, dict[str, str]] = {
         "alt.highscore": (
             "High score: 1UP {total} contributions and a best of {best} contributions in one day."
         ),
-        "alt.bilbao": "Pixel art of the Bilbao skyline.",
+        "alt.bilbao": (
+            "Bilbao at night in pixel art, with twinkling stars, lit windows and water reflections: "
+            "the Guggenheim, the Puppy sculpture, the red arch of La Salve bridge, the Iberdrola tower, "
+            "the Zubizuri bridge, the Artxanda hills and the estuary (ria)."
+        ),
     },
 }
 
