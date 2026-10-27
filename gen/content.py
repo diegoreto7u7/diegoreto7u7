@@ -144,7 +144,7 @@ COPY: dict[str, dict[str, str]] = {
             "$ whoami, Diego · backend, visión y datos, $ cat lenguajes.txt, "
             "Python TS C/C++ Go Rust PHP Java, $ ./conteobk --cam 03, "
             "> modelo YOLO cargado... OK, > pipeline en marcha. "
-            "Junto a la terminal, una cámara pixel art detecta personas y marca el AFORO."
+            "Además, una cámara pixel art detecta personas y marca el AFORO."
         ),
         "alt.sheet": (
             "Ficha de personaje. Clase: Backend, visión artificial y datos. "
@@ -225,7 +225,7 @@ COPY: dict[str, dict[str, str]] = {
             "$ whoami, Diego · backend, vision & data, $ cat languages.txt, "
             "Python TS C/C++ Go Rust PHP Java, $ ./conteobk --cam 03, "
             "> YOLO model loaded... OK, > pipeline running. "
-            "Next to the terminal, a pixel art camera detects people walking past and keeps a running PEOPLE count."
+            "A pixel art camera also detects people walking past and keeps a running PEOPLE count."
         ),
         "alt.sheet": (
             "Character sheet. Class: Backend, computer vision and data. "

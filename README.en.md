@@ -3,7 +3,7 @@
 
 **Diego Orue** · Software developer in Bilbao, Spain · Backend, computer vision & data
 
-<p align="center"><picture><source media="(max-width: 600px)" srcset="https://github.com/diegoreto7u7/diegoreto7u7/raw/main/assets/en/m-hero.svg"><img src="assets/en/hero.svg" width="100%" alt="Diego Orue, software developer in Bilbao. A pixel art terminal types: $ whoami, Diego · backend, vision &amp; data, $ cat languages.txt, Python TS C/C++ Go Rust PHP Java, $ ./conteobk --cam 03, &gt; YOLO model loaded... OK, &gt; pipeline running. Next to the terminal, a pixel art camera detects people walking past and keeps a running PEOPLE count."></picture></p>
+<p align="center"><picture><source media="(max-width: 600px)" srcset="https://github.com/diegoreto7u7/diegoreto7u7/raw/main/assets/en/m-hero.svg"><img src="assets/en/hero.svg" width="100%" alt="Diego Orue, software developer in Bilbao. A pixel art terminal types: $ whoami, Diego · backend, vision &amp; data, $ cat languages.txt, Python TS C/C++ Go Rust PHP Java, $ ./conteobk --cam 03, &gt; YOLO model loaded... OK, &gt; pipeline running. A pixel art camera also detects people walking past and keeps a running PEOPLE count."></picture></p>
 <p align="center">
   <a href="https://diegoret.pages.dev/en/"><img src="assets/en/btn-portfolio.svg" height="48" alt="Portfolio"></a>
   <a href="https://www.linkedin.com/in/diegoret"><img src="assets/en/btn-linkedin.svg" height="48" alt="LinkedIn"></a>

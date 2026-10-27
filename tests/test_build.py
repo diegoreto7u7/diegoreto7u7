@@ -158,6 +158,18 @@ class BuildTests(unittest.TestCase):
                 title = ET.fromstring(svgs[name]).find("{*}title").text
                 self.assertEqual(alts[name], title, (lang, name))
 
+    def test_picture_alts_are_layout_neutral(self):
+        # el alt de un <picture> vale para las dos versiones: no puede decir dónde va cada cosa
+        # («junto a la terminal» es verdad en escritorio, pero en el móvil la cámara va debajo)
+        where = re.compile(r"\b(junto a|al lado|a la (derecha|izquierda)|debajo|encima|"
+                           r"next to|beside|to the (right|left)|below|above)\b", re.I)
+        for lang in LANGS:
+            p = _Imgs()
+            p.feed(render_readme(lang))
+            for pic in p.pictures:
+                alt = pic["imgs"][0]["alt"]
+                self.assertIsNone(where.search(alt), (lang, alt))
+
     def test_img_attributes_parse_cleanly(self):
         for lang in LANGS:
             md = render_readme(lang)

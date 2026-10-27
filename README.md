@@ -3,7 +3,7 @@
 
 **Diego Orue** · Desarrollador de software en Bilbao · Backend, visión artificial y datos
 
-<p align="center"><picture><source media="(max-width: 600px)" srcset="https://github.com/diegoreto7u7/diegoreto7u7/raw/main/assets/es/m-hero.svg"><img src="assets/es/hero.svg" width="100%" alt="Diego Orue, desarrollador de software en Bilbao. Una terminal pixel art escribe: $ whoami, Diego · backend, visión y datos, $ cat lenguajes.txt, Python TS C/C++ Go Rust PHP Java, $ ./conteobk --cam 03, &gt; modelo YOLO cargado... OK, &gt; pipeline en marcha. Junto a la terminal, una cámara pixel art detecta personas y marca el AFORO."></picture></p>
+<p align="center"><picture><source media="(max-width: 600px)" srcset="https://github.com/diegoreto7u7/diegoreto7u7/raw/main/assets/es/m-hero.svg"><img src="assets/es/hero.svg" width="100%" alt="Diego Orue, desarrollador de software en Bilbao. Una terminal pixel art escribe: $ whoami, Diego · backend, visión y datos, $ cat lenguajes.txt, Python TS C/C++ Go Rust PHP Java, $ ./conteobk --cam 03, &gt; modelo YOLO cargado... OK, &gt; pipeline en marcha. Además, una cámara pixel art detecta personas y marca el AFORO."></picture></p>
 <p align="center">
   <a href="https://diegoret.pages.dev/"><img src="assets/es/btn-portfolio.svg" height="48" alt="Portfolio"></a>
   <a href="https://www.linkedin.com/in/diegoret"><img src="assets/es/btn-linkedin.svg" height="48" alt="LinkedIn"></a>
