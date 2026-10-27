@@ -1,0 +1,38 @@
+name: Actualizar datos vivos
+
+on:
+  schedule:
+    - cron: "23 4 * * *"
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ["gen/**", "fonts/**"]
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - name: Tests
+        run: python -m unittest discover -s tests -t .
+      - name: Regenerar con datos vivos
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python -m gen build --refresh
+      - name: Commit y push si hay cambios
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "Sin cambios"
+          else
+            git commit -m "chore: actualizar datos vivos"
+            git push
+          fi
