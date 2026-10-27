@@ -10,7 +10,7 @@
   <a href="mailto:orueret@gmail.com"><img src="assets/es/btn-email.svg" height="48" alt="CORREO"></a>
   <a href="https://diegoret.pages.dev/cv-diego-orue.pdf"><img src="assets/es/btn-cv.svg" height="48" alt="CV"></a>
 </p>
-<p align="center"><img src="assets/es/sheet.svg" width="100%" alt="Ficha de personaje. Clase: Backend, visión artificial y datos. Gremio: Radimer Seguridad, desde 2025. Base: Bilbao. Origen: pasé por los videojuegos con Unity (300 h) antes de acabar montando pipelines de visión. Idiomas: español nativo, inglés B2, euskera B2. Habilidades: Python 29,0 %, TypeScript 28,9 %, C / C++ 20,7 %, Go 5,7 %, PHP 3,6 %, Rust 2,8 %. EXP 4.538 contribuciones, 203 días activos."></p>
+<p align="center"><img src="assets/es/sheet.svg" width="100%" alt="Ficha de personaje. Clase: Backend, visión artificial y datos. Gremio: Radimer Seguridad, desde 2025. Base: Bilbao. Origen: pasé por los videojuegos con Unity (300 h) antes de acabar montando pipelines de visión. Idiomas: español nativo, inglés B2, euskera B2. Habilidades: Python 29,0 %, TypeScript 28,9 %, C / C++ 20,7 %, Go 5,7 %, PHP 3,6 %, Rust 2,8 %. EXP 4.541 contribuciones, 203 días activos."></p>
 <p align="center"><img src="assets/es/achievements.svg" width="100%" alt="Logros desbloqueados: 143 contribuciones en un solo día; 36 lenguajes en mis repos; vídeo en tiempo real sobre GPU con DeepStream y Triton; RAG sobre más de 5 millones de registros públicos; ERP modular en Rust; plataforma smart city en Go; racha récord: 16 días seguidos."></p>
 <p align="center"><img src="assets/es/inventory.svg" width="100%" alt="Inventario de herramientas: Python, Go, Rust, Linux, Docker, Kubernetes, PostgreSQL, React, CUDA y DeepStream."></p>
 <p align="center"><img src="assets/es/quests-title.svg" width="100%" alt="MISIONES"></p>
@@ -21,6 +21,6 @@
   <a href="https://diegoret.pages.dev/proyectos/smart-city-platform/"><img src="assets/es/quest-smart-city-platform.svg" width="49%" alt="Garu-City — Una plataforma para conectar los servicios de una ciudad. (En desarrollo)"></a>
 </p>
 <p align="center"><a href="https://diegoret.pages.dev/"><img src="assets/es/quests-more.svg" width="100%" alt="+9 misiones más en diegoret.pages.dev"></a></p>
-<p align="center"><img src="assets/es/highscore.svg" width="100%" alt="High score: 1UP 4.538 contribuciones y récord de 143 contribuciones en un día."></p>
+<p align="center"><img src="assets/es/highscore.svg" width="100%" alt="High score: 1UP 4.541 contribuciones y récord de 143 contribuciones en un día."></p>
 <p align="center"><img src="assets/es/bilbao.svg" width="100%" alt="Bilbao de noche en pixel art, con estrellas que titilan, ventanas encendidas y reflejos en el agua: el Guggenheim, el Puppy, el arco rojo del puente de La Salve, la torre Iberdrola, el puente Zubizuri, los montes de Artxanda y la ría."></p>
 <p align="center"><a href="mailto:orueret@gmail.com"><img src="assets/es/start.svg" width="100%" alt="PULSA START PARA HABLAR CONMIGO: orueret@gmail.com"></a></p>
