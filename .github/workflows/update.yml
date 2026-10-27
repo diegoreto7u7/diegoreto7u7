@@ -11,6 +11,11 @@ on:
 permissions:
   contents: write
 
+# Una sola ejecución a la vez: la siguiente espera en cola en vez de pisar el push de la anterior.
+concurrency:
+  group: update-live-data
+  cancel-in-progress: false
+
 jobs:
   update:
     runs-on: ubuntu-latest
@@ -21,6 +26,8 @@ jobs:
           python-version: "3.12"
       - name: Tests
         run: python -m unittest discover -s tests -t .
+      # Si la descarga falla, cae más de la mitad o falta el token, este paso sale en rojo
+      # y no se commitea nada: los datos no se congelan sin avisar.
       - name: Regenerar con datos vivos
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -29,10 +36,11 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -A
+          git add README.md README.en.md assets data
           if git diff --cached --quiet; then
             echo "Sin cambios"
           else
             git commit -m "chore: actualizar datos vivos"
+            git pull --rebase
             git push
           fi

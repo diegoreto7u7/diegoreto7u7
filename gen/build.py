@@ -19,9 +19,13 @@ def render_all(lang: str, live: LiveStats) -> dict[str, str]:
     return files
 
 
-def build(out: Path, refresh: bool, token: str | None) -> list[Path]:
+def build(out: Path, refresh: bool, token: str | None, strict: bool = False) -> list[Path]:
+    """Escribe README y assets en `out`; la caché del calendario se lee de `out/data/live.json`.
+
+    Con `strict` (lo que usa `--refresh`), si la descarga falla no se escribe nada y sale con código 1.
+    """
     out = Path(out)
-    live = load_live(out / "data" / "live.json", refresh=refresh, token=token)
+    live = load_live(out / "data" / "live.json", refresh=refresh, token=token, strict=strict)
     rendered = {lang: render_all(lang, live) for lang in LANGS}
     problems = [f"{lang}/{name}: {p}"
                 for lang, files in rendered.items()

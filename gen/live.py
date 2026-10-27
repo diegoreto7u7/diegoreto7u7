@@ -1,5 +1,6 @@
 """Calendario de contribuciones: descarga, caché y estadísticas."""
 
+import http.client
 import json
 import sys
 import urllib.error
@@ -91,29 +92,47 @@ def _read_cache(path: Path) -> list[tuple[str, int]] | None:
     return [(d, int(n)) for d, n in json.loads(path.read_text())["days"]]
 
 
+def _keep_cache(strict: bool, problem: str) -> None:
+    """Sin modo estricto avisa y deja seguir con la caché; en modo estricto corta con código 1.
+
+    En los dos casos la caché queda como estaba.
+    """
+    if strict:
+        print(f"error: {problem}. La caché no se toca y no se genera nada.", file=sys.stderr)
+        raise SystemExit(1)
+    print(f"aviso: {problem}; se usa la caché", file=sys.stderr)
+
+
 def load_live(
     path: Path,
     refresh: bool,
     token: str | None,
     login: str = "diegoreto7u7",
     opener=urllib.request.urlopen,
+    strict: bool = False,
 ) -> LiveStats:
+    """Estadísticas del calendario, de la caché o (con `refresh`) recién descargadas.
+
+    `strict` es el modo de `python -m gen build --refresh` (la Action): una descarga fallida,
+    una caída de más de la mitad o la falta de token terminan con código 1 en vez de seguir
+    en silencio con la caché, para que la ejecución salga en rojo.
+    """
     cached = _read_cache(path)
-    if refresh and token:
+    if refresh and not token:
+        _keep_cache(strict, "--refresh necesita la variable GITHUB_TOKEN")
+    elif refresh:
         try:
             fresh = fetch_calendar(login, token, opener=opener)
-        except (urllib.error.URLError, OSError, ValueError) as e:
+        except (urllib.error.URLError, OSError, ValueError, http.client.HTTPException) as e:
             if cached is None:
                 print(f"no se pudo descargar el calendario y no hay caché: {e}", file=sys.stderr)
                 raise SystemExit(1)
-            print(f"aviso: descarga fallida ({e}); se usa la caché", file=sys.stderr)
+            _keep_cache(strict, f"no se pudo descargar el calendario ({e})")
         else:
             fresh_total = sum(n for _, n in fresh)
             if cached is not None and fresh_total < MIN_KEEP_RATIO * sum(n for _, n in cached):
-                print(
-                    f"aviso: la descarga suma {fresh_total}, muy por debajo de la caché; se conserva la caché",
-                    file=sys.stderr,
-                )
+                _keep_cache(strict, f"la descarga suma {fresh_total} contribuciones, menos de la "
+                                    f"mitad de las {sum(n for _, n in cached)} de la caché")
             else:
                 path.parent.mkdir(parents=True, exist_ok=True)
                 rows = ",\n".join(f"  {json.dumps([d, n])}" for d, n in fresh)
