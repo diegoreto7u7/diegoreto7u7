@@ -5,7 +5,7 @@ from gen.live import LiveStats
 from gen.pixel import sprite
 from gen.scenes.common import BLINK_CSS, HEADER_H, HEADER_W, header
 from gen.sprites.misc import ARROW, DOT, DOWN, ICONS, STAR
-from gen.svg import document, text, text_width, wrap
+from gen.svg import document, rect, text, text_width, wrap
 
 W, H = 416, 196
 PAD = 24
@@ -14,14 +14,10 @@ BG, LINE, INK = "#0d1117", "#f0f6fc", "#c9d1d9"
 GREY, GREEN, YELLOW = "#8b949e", "#3fb950", "#e3b341"
 
 
-def _rect(x, y, w, h, fill) -> str:
-    return f'<rect x="{x}" y="{y}" width="{w}" height="{h}" fill="{fill}"/>'
-
-
 def _frame() -> str:
     # borde doble claro: 4 px fuera, hueco oscuro de 4 px y línea de 2 px dentro
-    return (_rect(0, 0, W, H, LINE) + _rect(4, 4, W - 8, H - 8, BG)
-            + _rect(8, 8, W - 16, H - 16, LINE) + _rect(10, 10, W - 20, H - 20, BG))
+    return (rect(0, 0, W, H, LINE) + rect(4, 4, W - 8, H - 8, BG)
+            + rect(8, 8, W - 16, H - 16, LINE) + rect(10, 10, W - 20, H - 20, BG))
 
 
 def _card(q: Quest, lang: str) -> str:
@@ -39,7 +35,7 @@ def _card(q: Quest, lang: str) -> str:
     status = q.status[lang]
     dot = YELLOW if q.in_progress else GREEN
     chip_w = 10 + 15 + 8 + text_width(status, "vt323", 22) + 10
-    body += _rect(PAD, 152, chip_w, 28, "#21262d")
+    body += rect(PAD, 152, chip_w, 28, "#21262d")
     body += sprite(DOT[0], {"A": dot}, PAD + 10, 159, 3)
     body += text(PAD + 33, 173, status, "vt323", 22, INK, max_width=chip_w - 33 - 10)
     body += sprite(DOWN[0], {"A": "#e6edf3"}, W - PAD - 21, 160, 3, "blink")

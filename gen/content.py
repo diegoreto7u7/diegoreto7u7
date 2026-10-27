@@ -262,3 +262,8 @@ def quest_stack(q: Quest, lang: str) -> str:
 def fmt_int(n: int, lang: str) -> str:
     s = f"{n:,}"
     return s.replace(",", ".") if lang == "es" else s
+
+
+def fmt_pct(p: float, lang: str) -> str:
+    """ES «29,0 %», EN «29.0%»."""
+    return f"{p:.1f}".replace(".", ",") + " %" if lang == "es" else f"{p:.1f}%"

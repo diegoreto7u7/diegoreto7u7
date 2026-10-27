@@ -202,8 +202,7 @@ def _bilbao() -> tuple[str, str]:
 def _bilbao_svg(lang: str) -> str:
     base, over = _bilbao()
     body = f'<g transform="scale({SCALE})">{base}{over}</g>'
-    title = {"es": "Bilbao de noche en pixel art", "en": "Bilbao at night in pixel art"}[lang]
-    return document(W * SCALE, H * SCALE, title, body, css=CSS)
+    return document(W * SCALE, H * SCALE, COPY[lang]["alt.bilbao"], body, css=CSS)
 
 
 def _start_svg(lang: str) -> str:

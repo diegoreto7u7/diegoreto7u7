@@ -16,7 +16,7 @@ from gen.live import LiveStats
 from gen.pixel import sprite, two_frames
 from gen.scenes.common import BLINK_CSS, header
 from gen.sprites.misc import PAC, ghost
-from gen.svg import document, text
+from gen.svg import document, pct, rect, text
 
 W = 840
 BG, NAVY, WALL, VOID = "#0d1117", "#1f2a6b", "#2f3fb0", "#010409"
@@ -68,14 +68,6 @@ def _layout(days) -> tuple[list[tuple[int, int, int]], int]:
     return cells, cells[-1][0] + 1
 
 
-def _pct(seconds: float) -> str:
-    return f"{seconds * 100 / CYCLE:.2f}".rstrip("0").rstrip(".")
-
-
-def _r(x, y, w, h, fill) -> str:
-    return f'<rect x="{x}" y="{y}" width="{w}" height="{h}" fill="{fill}"/>'
-
-
 class _Path:
     """Serpentina sobre 7 filas × `cols` columnas, medida en pasos de celda."""
 
@@ -104,8 +96,8 @@ def _grid(cells, path: _Path) -> tuple[str, str]:
         if n > 0:
             i = path.distance(col, row)
             cls += f" e{i}"
-            css.append(f".e{i}{{animation-name:e{i}}}"
-                       f"@keyframes e{i}{{{_pct(path.time(i))}%{{opacity:{EATEN}}}}}")
+            at = pct(path.time(i), CYCLE, trim=True)
+            css.append(f".e{i}{{animation-name:e{i}}}@keyframes e{i}{{{at}%{{opacity:{EATEN}}}}}")
         out.append(f'<rect class="{cls}" x="{x}" y="{y}" width="{CELL}" height="{CELL}"/>')
     base = (f".cell{{animation:{CYCLE:g}s step-end infinite}}"
             + "".join(f".l{i}{{fill:{c}}}" for i, c in enumerate(LEVELS)))
@@ -138,14 +130,15 @@ def _runners(path: _Path) -> tuple[str, str]:
         first, last = (0, path.cols - 1) if row % 2 == 0 else (path.cols - 1, 0)
         for col in (first, last):
             x, y = path.center(col, row)
-            stops.append(f"{_pct(path.time(path.distance(col, row)))}%"
-                         f"{{transform:translate({x}px,{y}px)}}")
+            at = pct(path.time(path.distance(col, row)), CYCLE, trim=True)
+            stops.append(f"{at}%{{transform:translate({x}px,{y}px)}}")
         if row:
             flip = "scale(-1,1)" if row % 2 else "none"
-            faces.append(f"{_pct(path.time(path.distance(first, row)))}%{{transform:{flip}}}")
+            at = pct(path.time(path.distance(first, row)), CYCLE, trim=True)
+            faces.append(f"{at}%{{transform:{flip}}}")
     end = path.center(path.cols - 1, DAYS - 1)
     stops.append(f"to{{transform:translate({end[0]}px,{end[1]}px)}}")
-    faces.append(f"{_pct(RUN)}%{{opacity:0}}")
+    faces.append(f"{pct(RUN, CYCLE, trim=True)}%{{opacity:0}}")
     css = ([f".run{{animation:run {CYCLE:g}s linear infinite}}",
             f".face{{animation:face {CYCLE:g}s step-end infinite}}"]
            + delays
@@ -157,8 +150,8 @@ def _runners(path: _Path) -> tuple[str, str]:
 def _frame(h: int) -> str:
     """Marco de laberinto: azul marino por fuera, hueco negro y línea azul viva por dentro."""
     y = FRAME_Y
-    return (_r(0, y, W, h, NAVY) + _r(4, y + 4, W - 8, h - 8, VOID)
-            + _r(6, y + 6, W - 12, h - 12, WALL) + _r(8, y + 8, W - 16, h - 16, VOID))
+    return (rect(0, y, W, h, NAVY) + rect(4, y + 4, W - 8, h - 8, VOID)
+            + rect(6, y + 6, W - 12, h - 12, WALL) + rect(8, y + 8, W - 16, h - 16, VOID))
 
 
 def render(lang: str, live: LiveStats) -> dict[str, str]:

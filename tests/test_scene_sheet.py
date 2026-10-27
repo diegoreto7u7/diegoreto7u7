@@ -15,6 +15,12 @@ class TestSceneSheet(unittest.TestCase):
     def test_segments(self):
         self.assertEqual([segments(p) for _, p in SKILLS], [20, 20, 14, 4, 2, 2])
 
+    def test_segments_clamped_to_bar(self):
+        top = max(p for _, p in SKILLS)
+        self.assertEqual(segments(top), 20)
+        self.assertEqual(segments(top * 1.5), 20)        # por encima del máximo no se sale de la barra
+        self.assertEqual(segments(0.01), 1)              # un lenguaje mínimo enciende al menos uno
+
     def test_sheet_valid_and_live(self):
         svg = sheet.render("es", LIVE)["sheet.svg"]
         self.assertEqual(check_svg(svg), [])

@@ -9,7 +9,7 @@ from gen.live import LiveStats, streak_badge
 from gen.pixel import rects
 from gen.scenes.common import BLINK_CSS, header
 from gen.sprites.misc import TROPHY
-from gen.svg import document, text
+from gen.svg import document, rect, text
 
 W = 840
 BG, FRAME, PANEL, ICON_BG = "#0d1117", "#30363d", "#161b22", "#0d1117"
@@ -34,10 +34,6 @@ def _texts(lang: str, live: LiveStats) -> list[str]:
             + [streak_text(lang, live)])
 
 
-def _r(x, y, w, h, fill) -> str:
-    return f'<rect x="{x}" y="{y}" width="{w}" height="{h}" fill="{fill}"/>'
-
-
 def _toast(i: int, label: str, toast: str) -> str:
     x, y, w, h = TOAST_X, TOAST_Y0 + i * (TOAST_H + TOAST_GAP), TOAST_W, TOAST_H
     rows, pal = TROPHY
@@ -45,12 +41,12 @@ def _toast(i: int, label: str, toast: str) -> str:
     silhouette = ["".join("." if ch == "." else "A" for ch in row) for row in rows]
     shine = rects(silhouette, {"A": "#fffbe6"}, tx, ty, TROPHY_SCALE)   # destello: trofeo en blanco
     # esquinas recortadas de 2 px para que el marco se lea pixelado
-    corners = "".join(_r(cx, cy, 2, 2, BG) for cx in (x, x + w - 2) for cy in (y, y + h - 2))
+    corners = "".join(rect(cx, cy, 2, 2, BG) for cx in (x, x + w - 2) for cy in (y, y + h - 2))
     cls = "toast" if i == 0 else f"toast slide s{i}"
     return (
         f'<g class="{cls}">'
-        + _r(x, y, w, h, FRAME) + _r(x + 2, y + 2, w - 4, h - 4, PANEL)
-        + _r(x + 2, y + 2, 56, h - 4, ICON_BG) + _r(x + 58, y + 2, 2, h - 4, FRAME)
+        + rect(x, y, w, h, FRAME) + rect(x + 2, y + 2, w - 4, h - 4, PANEL)
+        + rect(x + 2, y + 2, 56, h - 4, ICON_BG) + rect(x + 58, y + 2, 2, h - 4, FRAME)
         + corners
         + rects(rows, pal, tx, ty, TROPHY_SCALE)
         + f'<g class="shine h{i}">{shine}</g>'

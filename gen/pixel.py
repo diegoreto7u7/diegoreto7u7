@@ -11,7 +11,8 @@ FRAME_CSS = (
 )
 
 
-def _num(v: float) -> str:
+def num(v: float) -> str:
+    """Número de un atributo SVG: entero sin «.0» y decimales con %g."""
     return str(int(v)) if float(v).is_integer() else f"{v:g}"
 
 
@@ -40,8 +41,8 @@ def rects(rows: Sequence[str], palette: Mapping[str, str],
                 run += 1
             if ch != ".":
                 out.append(
-                    f'<rect x="{_num(x + col * scale)}" y="{_num(y + row_i * scale)}" '
-                    f'width="{_num((run - col) * scale)}" height="{_num(scale)}" '
+                    f'<rect x="{num(x + col * scale)}" y="{num(y + row_i * scale)}" '
+                    f'width="{num((run - col) * scale)}" height="{num(scale)}" '
                     f'fill="{palette[ch]}"/>'
                 )
             col = run

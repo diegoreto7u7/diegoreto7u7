@@ -3,7 +3,7 @@
 from typing import Iterable
 
 from gen.fonts import ADVANCE, CHARSET, MIN_SIZE, font_face_css
-from gen.pixel import FRAME_CSS
+from gen.pixel import FRAME_CSS, num
 
 REDUCED_MOTION = "@media (prefers-reduced-motion: reduce){*{animation:none!important}}"
 
@@ -13,8 +13,18 @@ def escape(s: str) -> str:
             .replace(">", "&gt;").replace('"', "&quot;"))
 
 
-def _num(v: float) -> str:
-    return str(int(v)) if float(v).is_integer() else f"{v:g}"
+def rect(x, y, w, h, fill, extra="") -> str:
+    """Un <rect> con los valores tal cual; `extra` añade atributos (p. ej. ' class="blink"')."""
+    return f'<rect x="{x}" y="{y}" width="{w}" height="{h}" fill="{fill}"{extra}/>'
+
+
+def pct(t: float, cycle: float, trim: bool = False) -> str:
+    """Momento `t` (s) de un ciclo de `cycle` s como porcentaje de @keyframes, sin el «%».
+
+    Con dos decimales («12.50»); con `trim`, sin ceros sobrantes («12.5», «10»).
+    """
+    s = f"{t * 100 / cycle:.2f}"
+    return s.rstrip("0").rstrip(".") if trim else s
 
 
 def text_width(s: str, font: str, size: float) -> float:
@@ -30,8 +40,8 @@ def text(x, y, s, font, size, fill, cls="", anchor="start", max_width=None) -> s
     if max_width is not None and text_width(s, font, size) > max_width:
         raise ValueError(f"el texto {s!r} no cabe en {max_width}")
     c = f' class="{cls}"' if cls else ""
-    return (f'<text x="{_num(x)}" y="{_num(y)}" font-family="{font}" '
-            f'font-size="{_num(size)}" fill="{fill}" text-anchor="{anchor}"{c}>'
+    return (f'<text x="{num(x)}" y="{num(y)}" font-family="{font}" '
+            f'font-size="{num(size)}" fill="{fill}" text-anchor="{anchor}"{c}>'
             f'{escape(s)}</text>')
 
 

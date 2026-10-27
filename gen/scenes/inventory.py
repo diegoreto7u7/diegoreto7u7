@@ -10,7 +10,7 @@ from gen.pixel import sprite
 from gen.scenes.common import BLINK_CSS, header
 from gen.sprites.items import ITEMS
 from gen.sprites.misc import DOWN
-from gen.svg import document, text
+from gen.svg import document, rect, text
 
 W = 840
 BG, BORDER, WELL, SHADOW, LIT = "#0d1117", "#21262d", "#161b22", "#0a0d12", "#30363d"
@@ -26,10 +26,6 @@ ARROW_SCALE = 3
 STEP = 1.2                  # segundos que el cursor pasa en cada casilla
 
 
-def _r(x, y, w, h, fill) -> str:
-    return f'<rect x="{x}" y="{y}" width="{w}" height="{h}" fill="{fill}"/>'
-
-
 def _origin(i: int) -> tuple[int, int]:
     row, col = divmod(i, COLS)
     return col * (SLOT_W + GAP_X), ROW0_Y + row * (SLOT_H + GAP_Y)
@@ -43,12 +39,12 @@ def _slot(i: int, name: str) -> str:
     item_w, item_h = len(rows[0]) * ITEM_SCALE, len(rows) * ITEM_SCALE
     box = 12 * ITEM_SCALE                       # los objetos miden 12 de ancho y hasta 12 de alto
     inner_w, inner_h = SLOT_W - 2 * EDGE, SLOT_H - 2 * EDGE
-    return (_r(x, y, SLOT_W, SLOT_H, BORDER)
-            + _r(x + EDGE, y + EDGE, inner_w, inner_h, WELL)
-            + _r(x + EDGE, y + SLOT_H - 2 * EDGE, inner_w, EDGE, LIT)
-            + _r(x + SLOT_W - 2 * EDGE, y + EDGE, EDGE, inner_h, LIT)
-            + _r(x + EDGE, y + EDGE, inner_w, EDGE, SHADOW)
-            + _r(x + EDGE, y + EDGE, EDGE, inner_h, SHADOW)
+    return (rect(x, y, SLOT_W, SLOT_H, BORDER)
+            + rect(x + EDGE, y + EDGE, inner_w, inner_h, WELL)
+            + rect(x + EDGE, y + SLOT_H - 2 * EDGE, inner_w, EDGE, LIT)
+            + rect(x + SLOT_W - 2 * EDGE, y + EDGE, EDGE, inner_h, LIT)
+            + rect(x + EDGE, y + EDGE, inner_w, EDGE, SHADOW)
+            + rect(x + EDGE, y + EDGE, EDGE, inner_h, SHADOW)
             + sprite(rows, pal, x + (SLOT_W - item_w) // 2,
                      y + ITEM_TOP + (box - item_h) // 2, ITEM_SCALE)
             + text(x + SLOT_W // 2, y + LABEL_BASE, name, "vt323", 22, LABEL, anchor="middle",
@@ -62,8 +58,8 @@ def _cursor() -> tuple[str, str]:
     arrow_w, arrow_h = len(rows[0]) * ARROW_SCALE, len(rows) * ARROW_SCALE
     svg = (
         '<g class="cur">'
-        + _r(x, y, SLOT_W, EDGE, YELLOW) + _r(x, y + SLOT_H - EDGE, SLOT_W, EDGE, YELLOW)
-        + _r(x, y, EDGE, SLOT_H, YELLOW) + _r(x + SLOT_W - EDGE, y, EDGE, SLOT_H, YELLOW)
+        + rect(x, y, SLOT_W, EDGE, YELLOW) + rect(x, y + SLOT_H - EDGE, SLOT_W, EDGE, YELLOW)
+        + rect(x, y, EDGE, SLOT_H, YELLOW) + rect(x + SLOT_W - EDGE, y, EDGE, SLOT_H, YELLOW)
         + sprite(rows, pal, x + (SLOT_W - arrow_w) // 2, y - arrow_h - 3, ARROW_SCALE)
         + "</g>"
     )

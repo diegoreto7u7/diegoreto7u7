@@ -1,7 +1,7 @@
 import unittest
 
 from gen.content import (COPY, INVENTORY, LANGS, PROJECT_TOTAL, QUESTS, SKILLS,
-                         URLS, fmt_int)
+                         URLS, fmt_int, fmt_pct)
 from gen.fonts import CHARSET
 
 
@@ -28,6 +28,8 @@ class ContentTest(unittest.TestCase):
         self.assertEqual(fmt_int(4452, "es"), "4.452")
         self.assertEqual(fmt_int(4452, "en"), "4,452")
         self.assertEqual(fmt_int(143, "es"), "143")
+        self.assertEqual(fmt_pct(29.0, "es"), "29,0 %")
+        self.assertEqual(fmt_pct(28.9, "en"), "28.9%")
 
     def test_quests(self):
         self.assertEqual([q.slug for q in QUESTS], ["conteobk", "licitaciones", "nectum", "smart-city-platform"])

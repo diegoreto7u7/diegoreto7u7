@@ -4,13 +4,13 @@ El estado base de cada elemento es su estado final (barras encendidas, EXP llena
 con movimiento reducido se ve la ficha completa.
 """
 
-from gen.content import COPY, SKILLS, fmt_int
+from gen.content import COPY, SKILLS, fmt_int, fmt_pct
 from gen.live import LiveStats
 from gen.pixel import rects, sprite, two_frames
 from gen.scenes.common import BLINK_CSS, header
 from gen.sprites.avatar import AVATAR_A, AVATAR_B, AVATAR_BLINK, PALETTE
 from gen.sprites.misc import HEART_OFF, HEART_ON, MUG
-from gen.svg import document, text, text_width, wrap
+from gen.svg import document, rect, text, text_width, wrap
 
 W = 840
 BG, FRAME, TRACK = "#0d1117", "#30363d", "#21262d"
@@ -38,22 +38,19 @@ SKILL_COLORS = {
 SEGMENTS, SEG_W, SEG_GAP, SEG_H = 20, 26, 2, 14
 NAME_W, PCT_W, SKILL_H = 140, 84, 28
 SEG_STEP = 0.06             # segundos entre segmento y segmento al encenderse
+SKILL_TOP = max(p for _, p in SKILLS)   # el lenguaje más usado llena la barra
 
 
 def segments(pct: float) -> int:
-    """Segmentos encendidos (de 20) para un lenguaje; el más usado (Python, 29 %) llena la barra."""
-    return max(1, round(pct / 29.0 * 20))
-
-
-def _r(x, y, w, h, fill, extra="") -> str:
-    return f'<rect x="{x}" y="{y}" width="{w}" height="{h}" fill="{fill}"{extra}/>'
+    """Segmentos encendidos (de 1 a 20) para un lenguaje; el más usado de SKILLS llena la barra."""
+    return min(SEGMENTS, max(1, round(pct / SKILL_TOP * SEGMENTS)))
 
 
 def _panel(h: int) -> str:
     # borde doble oscuro: 4 px fuera, hueco de 4 px y línea de 2 px dentro
     y = PANEL_Y
-    return (_r(0, y, W, h, FRAME) + _r(4, y + 4, W - 8, h - 8, BG)
-            + _r(8, y + 8, W - 16, h - 16, FRAME) + _r(10, y + 10, W - 20, h - 20, BG))
+    return (rect(0, y, W, h, FRAME) + rect(4, y + 4, W - 8, h - 8, BG)
+            + rect(8, y + 8, W - 16, h - 16, FRAME) + rect(10, y + 10, W - 20, h - 20, BG))
 
 
 def _avatar(y: float) -> tuple[str, str]:
@@ -69,7 +66,7 @@ def _avatar(y: float) -> tuple[str, str]:
     # el brillo de la pantalla cae sobre la piel y el blanco de los ojos de la cabeza (filas 0–12)
     face = ["".join("A" if c in "Ssme" else "." for c in row) for row in AVATAR_A[:13]]
     svg = (
-        _r(AV_X - 12, desk_y, mug_x + len(mug_a[0]) * MUG_SCALE + 12 - (AV_X - 12), 6, FRAME)
+        rect(AV_X - 12, desk_y, mug_x + len(mug_a[0]) * MUG_SCALE + 12 - (AV_X - 12), 6, FRAME)
         + two_frames(AVATAR_A, AVATAR_B, PALETTE, AV_X, y, s)
         + f'<g class="eyes">{blink}</g>'
         + sprite(face, {"A": "#79c0ff"}, AV_X, y, s, "glow")
@@ -139,15 +136,15 @@ def _exp(lang: str, live: LiveStats, y: float) -> tuple[str, str, float]:
         f'height="{EXP_H}"/></clipPath>'
         f'<pattern id="xpcell" x="{x0}" y="0" width="{EXP_CELL}" height="{EXP_H}" '
         'patternUnits="userSpaceOnUse">'
-        f'{_r(0, 0, EXP_CELL - 2, EXP_H, GREEN)}{_r(EXP_CELL - 2, 0, 2, EXP_H, DARK_GREEN)}</pattern>'
+        f'{rect(0, 0, EXP_CELL - 2, EXP_H, GREEN)}{rect(EXP_CELL - 2, 0, 2, EXP_H, DARK_GREEN)}</pattern>'
         "</defs>"
-        + _r(PAD, y, inner_w + 4, EXP_H + 4, FRAME) + _r(x0, y + 2, inner_w, EXP_H, TRACK)
+        + rect(PAD, y, inner_w + 4, EXP_H + 4, FRAME) + rect(x0, y + 2, inner_w, EXP_H, TRACK)
     )
     css = ""
     if fill_w:
         # el relleno entra desde la izquierda dentro del recorte: parece que la barra crece
         svg += (f'<g clip-path="url(#xpclip)"><g class="xp">'
-                f'{_r(x0, y + 2, fill_w, EXP_H, "url(#xpcell)")}</g></g>')
+                f'{rect(x0, y + 2, fill_w, EXP_H, "url(#xpcell)")}</g></g>')
         css = (".xp{animation:xp 1.2s steps(12) .2s both}"
                f"@keyframes xp{{from{{transform:translateX(-{fill_w}px)}}}}")
     label = COPY[lang]["sheet.exp"].format(
@@ -161,10 +158,6 @@ def _exp(lang: str, live: LiveStats, y: float) -> tuple[str, str, float]:
     return svg, css, y
 
 
-def _pct(p: float, lang: str) -> str:
-    return f"{p:.1f}".replace(".", ",") + " %" if lang == "es" else f"{p:.1f}%"
-
-
 def _skills(lang: str, y: float) -> tuple[str, str, float]:
     """Seis barras de 20 segmentos que se encienden en secuencia una sola vez."""
     out = [text(PAD, y, COPY[lang]["sheet.skills"], "ps2p", 16, KEY, max_width=W - 2 * PAD)]
@@ -174,11 +167,11 @@ def _skills(lang: str, y: float) -> tuple[str, str, float]:
         out.append(text(PAD, y, name, "vt323", 26, LIGHT, max_width=NAME_W - 8))
         top = y - 15
         for i in range(SEGMENTS):
-            out.append(_r(bar_x + i * (SEG_W + SEG_GAP), top, SEG_W, SEG_H, TRACK))
+            out.append(rect(bar_x + i * (SEG_W + SEG_GAP), top, SEG_W, SEG_H, TRACK))
         for i in range(segments(p)):
-            out.append(_r(bar_x + i * (SEG_W + SEG_GAP), top, SEG_W, SEG_H, SKILL_COLORS[name],
-                          f' class="sg d{i}"'))
-        out.append(text(W - PAD, y, _pct(p, lang), "vt323", 26, LIGHT, anchor="end",
+            out.append(rect(bar_x + i * (SEG_W + SEG_GAP), top, SEG_W, SEG_H, SKILL_COLORS[name],
+                            f' class="sg d{i}"'))
+        out.append(text(W - PAD, y, fmt_pct(p, lang), "vt323", 26, LIGHT, anchor="end",
                         max_width=PCT_W))
     css = (".sg{animation:sg .06s steps(1) both}@keyframes sg{from{opacity:0}}"
            + "".join(f".d{i}{{animation-delay:{0.4 + i * SEG_STEP:.2f}s}}"

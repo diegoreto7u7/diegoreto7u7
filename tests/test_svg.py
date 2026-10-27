@@ -1,7 +1,7 @@
 import unittest
 import xml.etree.ElementTree as ET
 
-from gen.svg import document, text, text_width, wrap
+from gen.svg import document, pct, rect, text, text_width, wrap
 
 
 class TestSvg(unittest.TestCase):
@@ -45,3 +45,11 @@ class TestSvg(unittest.TestCase):
         doc = document(840, 100, "t", "", fonts=["ps2p", "vt323"])
         self.assertEqual(doc.count("@font-face"), 2)
         self.assertIn("data:font/woff;base64,", doc)
+
+    def test_shared_rect_and_pct(self):
+        self.assertEqual(rect(0, 4, 8, 2, "#fff"), '<rect x="0" y="4" width="8" height="2" fill="#fff"/>')
+        self.assertEqual(rect(1, 2, 3, 4, "#000", ' class="blink"'),
+                         '<rect x="1" y="2" width="3" height="4" fill="#000" class="blink"/>')
+        self.assertEqual(pct(7, 14), "50.00")
+        self.assertEqual(pct(7, 14, trim=True), "50")
+        self.assertEqual(pct(3, 24, trim=True), "12.5")
