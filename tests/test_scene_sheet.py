@@ -30,7 +30,8 @@ class TestSceneSheet(unittest.TestCase):
         svg = sheet.render("en", LIVE)["sheet.svg"]
         self.assertEqual(check_svg(svg), [])
         self.assertIn("CHARACTER SHEET", svg)
-        self.assertIn(f"{LIVE.active_days}/{LIVE.window_days} active days", svg)
+        self.assertIn(f"{LIVE.active_days} active days", svg)
+        self.assertNotIn(f"{LIVE.active_days}/{LIVE.window_days}", svg)
 
     def test_achievements_streak_rule(self):
         low = compute_stats(days_with_current_streak(2, longest=16))

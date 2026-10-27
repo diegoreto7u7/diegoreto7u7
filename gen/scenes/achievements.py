@@ -27,6 +27,16 @@ def streak_text(lang: str, live: LiveStats) -> str:
     return COPY[lang][f"ach.streak_{kind}"].format(n=fmt_int(n, lang))
 
 
+def alt_text(lang: str, live: LiveStats) -> str:
+    """Texto alternativo del bloque: el <title> del SVG y el alt del README son este mismo texto.
+
+    La racha va a mitad de frase, así que empieza en minúscula («…; racha récord: 16 días seguidos.»).
+    """
+    streak = streak_text(lang, live)
+    return COPY[lang]["alt.achievements"].format(best=fmt_int(live.best_day, lang),
+                                                 streak=streak[0].lower() + streak[1:])
+
+
 def _texts(lang: str, live: LiveStats) -> list[str]:
     c = COPY[lang]
     return ([c["ach.best_day"].format(n=fmt_int(live.best_day, lang))]
@@ -75,9 +85,6 @@ def render(lang: str, live: LiveStats) -> dict[str, str]:
     body = header(c["ach.title"]) + "".join(
         _toast(i, label, c["ach.toast"]) for i, label in enumerate(labels))
     h = TOAST_Y0 + len(labels) * (TOAST_H + TOAST_GAP) - TOAST_GAP + 8
-    streak = streak_text(lang, live)
-    title = c["alt.achievements"].format(best=fmt_int(live.best_day, lang),
-                                         streak=streak[0].lower() + streak[1:])
-    svg = document(W, h, title, body, css=BLINK_CSS + _css(len(labels)),
+    svg = document(W, h, alt_text(lang, live), body, css=BLINK_CSS + _css(len(labels)),
                    fonts=("ps2p", "vt323"), bg=BG)
     return {"achievements.svg": svg}

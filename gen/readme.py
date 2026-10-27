@@ -5,7 +5,7 @@ from pathlib import Path
 
 from .content import COPY, PROJECT_TOTAL, QUESTS, URLS, fmt_int
 from .live import LiveStats, load_live
-from .scenes.achievements import streak_text
+from .scenes import achievements
 
 DEFAULT_LIVE = Path(__file__).resolve().parent.parent / "data" / "live.json"
 
@@ -27,10 +27,8 @@ def render_readme(lang: str, live: LiveStats | None = None) -> str:
     alt = {
         "lang": c["alt.lang"],
         "hero": c["alt.hero"],
-        "sheet": c["alt.sheet"].format(
-            total=n(live.total), active=n(live.active_days), window=n(live.window_days)),
-        "achievements": c["alt.achievements"].format(
-            best=n(live.best_day), streak=streak_text(lang, live)),
+        "sheet": c["alt.sheet"].format(total=n(live.total), active=n(live.active_days)),
+        "achievements": achievements.alt_text(lang, live),
         "inventory": c["alt.inventory"],
         "highscore": c["alt.highscore"].format(total=n(live.total), best=n(live.best_day)),
         "bilbao": c["alt.bilbao"],

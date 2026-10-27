@@ -148,8 +148,7 @@ def _exp(lang: str, live: LiveStats, y: float) -> tuple[str, str, float]:
         css = (".xp{animation:xp 1.2s steps(12) .2s both}"
                f"@keyframes xp{{from{{transform:translateX(-{fill_w}px)}}}}")
     label = COPY[lang]["sheet.exp"].format(
-        total=fmt_int(live.total, lang), active=fmt_int(live.active_days, lang),
-        window=fmt_int(live.window_days, lang))
+        total=fmt_int(live.total, lang), active=fmt_int(live.active_days, lang))
     tag, rest = label.split(" ", 1)          # «EXP» en verde y el resto en claro
     rest_x = PAD + text_width(tag + " ", "vt323", 26)
     y += EXP_H + 32
@@ -190,8 +189,7 @@ def render(lang: str, live: LiveStats) -> dict[str, str]:
     body = (header(c["sheet.title"]) + _panel(h - PANEL_Y)
             + avatar + identity + exp + skills)
     title = c["alt.sheet"].format(total=fmt_int(live.total, lang),
-                                  active=fmt_int(live.active_days, lang),
-                                  window=fmt_int(live.window_days, lang))
+                                  active=fmt_int(live.active_days, lang))
     svg = document(W, h, title, body, css=BLINK_CSS + avatar_css + exp_css + skills_css,
                    fonts=("ps2p", "vt323"), bg=BG)
     return {"sheet.svg": svg}

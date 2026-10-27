@@ -20,7 +20,10 @@ class ContentTest(unittest.TestCase):
         for lang in LANGS:
             for k in ("lang", "hero", "sheet", "achievements", "inventory", "highscore", "bilbao"):
                 self.assertIn("alt." + k, COPY[lang])
-            self.assertIn("{window}", COPY[lang]["alt.sheet"])
+            self.assertIn("{active}", COPY[lang]["alt.sheet"])
+            # sin denominador: «203/367 días activos» parecía un error
+            self.assertNotIn("{window}", COPY[lang]["alt.sheet"])
+            self.assertNotIn("{window}", COPY[lang]["sheet.exp"])
             self.assertIn("{streak}", COPY[lang]["alt.achievements"])
             self.assertIn("{best}", COPY[lang]["alt.highscore"])
 

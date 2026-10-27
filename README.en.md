@@ -3,15 +3,15 @@
 
 **Diego Orue** · Software developer in Bilbao, Spain · Backend, computer vision & data
 
-<p align="center"><img src="assets/en/hero.svg" width="100%" alt="Diego Orue, software developer in Bilbao. A pixel art terminal types: $ whoami, Diego · backend, vision &amp; data, $ cat languages.txt, Python TS C/C++ Go Rust PHP Java, $ ./conteobk --cam 03, &gt; YOLO model loaded... OK, &gt; pipeline running. Next to the terminal, a pixel art camera detects people and counts them as PEOPLE."></p>
+<p align="center"><img src="assets/en/hero.svg" width="100%" alt="Diego Orue, software developer in Bilbao. A pixel art terminal types: $ whoami, Diego · backend, vision &amp; data, $ cat languages.txt, Python TS C/C++ Go Rust PHP Java, $ ./conteobk --cam 03, &gt; YOLO model loaded... OK, &gt; pipeline running. Next to the terminal, a pixel art camera detects people walking past and keeps a running PEOPLE count."></p>
 <p align="center">
   <a href="https://diegoret.pages.dev/en/"><img src="assets/en/btn-portfolio.svg" height="48" alt="Portfolio"></a>
   <a href="https://www.linkedin.com/in/diegoret"><img src="assets/en/btn-linkedin.svg" height="48" alt="LinkedIn"></a>
   <a href="mailto:orueret@gmail.com"><img src="assets/en/btn-email.svg" height="48" alt="EMAIL"></a>
   <a href="https://diegoret.pages.dev/cv-diego-orue.pdf"><img src="assets/en/btn-cv.svg" height="48" alt="CV"></a>
 </p>
-<p align="center"><img src="assets/en/sheet.svg" width="100%" alt="Character sheet. Class: Backend, computer vision and data. Guild: Radimer Seguridad, since 2025. Base: Bilbao, Spain. Origin: I went through game dev with Unity (300 h) before ending up building vision pipelines. Languages: Spanish (native), English (B2), Basque (B2). Skills: Python 29.0%, TypeScript 28.9%, C / C++ 20.7%, Go 5.7%, PHP 3.6%, Rust 2.8%. EXP 4,531 contributions, 203 of 367 days active."></p>
-<p align="center"><img src="assets/en/achievements.svg" width="100%" alt="Achievements unlocked: 143 contributions in a single day; 36 languages across my repos; real-time GPU video with DeepStream and Triton; RAG over more than 5 million public records; modular ERP in Rust; smart city platform in Go; Longest streak: 16 days in a row."></p>
+<p align="center"><img src="assets/en/sheet.svg" width="100%" alt="Character sheet. Class: Backend, computer vision and data. Guild: Radimer Seguridad, since 2025. Base: Bilbao, Spain. Origin: I went through game dev with Unity (300 h) before ending up building vision pipelines. Languages: Spanish (native), English (B2), Basque (B2). Skills: Python 29.0%, TypeScript 28.9%, C / C++ 20.7%, Go 5.7%, PHP 3.6%, Rust 2.8%. EXP 4,531 contributions, 203 active days."></p>
+<p align="center"><img src="assets/en/achievements.svg" width="100%" alt="Achievements unlocked: 143 contributions in a single day; 36 languages across my repos; real-time GPU video with DeepStream and Triton; RAG over more than 5 million public records; modular ERP in Rust; smart city platform in Go; longest streak: 16 days in a row."></p>
 <p align="center"><img src="assets/en/inventory.svg" width="100%" alt="Tool inventory: Python, Go, Rust, Linux, Docker, Kubernetes, PostgreSQL, React, CUDA and DeepStream."></p>
 <p align="center"><img src="assets/en/quests-title.svg" width="100%" alt="QUESTS"></p>
 <p align="center">

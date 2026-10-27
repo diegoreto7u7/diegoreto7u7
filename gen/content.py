@@ -120,7 +120,7 @@ COPY: dict[str, dict[str, str]] = {
         "sheet.guild_v": "Radimer Seguridad · desde 2025",
         "sheet.base_v": "Bilbao",
         "sheet.origin_v": "Pasé por los videojuegos con Unity (300 h) antes de acabar montando pipelines de visión.",
-        "sheet.exp": "EXP {total} contribuciones · {active}/{window} días activos",
+        "sheet.exp": "EXP {total} contribuciones · {active} días activos",
         "ach.title": "LOGROS DESBLOQUEADOS",
         "ach.toast": "¡Logro desbloqueado!",
         "ach.best_day": "{n} contribuciones en un solo día",
@@ -151,7 +151,7 @@ COPY: dict[str, dict[str, str]] = {
             "Gremio: Radimer Seguridad, desde 2025. Base: Bilbao. "
             "Origen: pasé por los videojuegos con Unity (300 h) antes de acabar montando pipelines de visión. "
             "Idiomas: español nativo, inglés B2, euskera B2. Habilidades: Python 29,0 %, TypeScript 28,9 %, C / C++ 20,7 %, Go 5,7 %, PHP 3,6 %, Rust 2,8 %. "
-            "EXP {total} contribuciones, {active} de {window} días activos."
+            "EXP {total} contribuciones, {active} días activos."
         ),
         "alt.achievements": (
             "Logros desbloqueados: {best} contribuciones en un solo día; 36 lenguajes en mis repos; "
@@ -201,7 +201,7 @@ COPY: dict[str, dict[str, str]] = {
         "sheet.guild_v": "Radimer Seguridad · since 2025",
         "sheet.base_v": "Bilbao, Spain",
         "sheet.origin_v": "I went through game dev with Unity (300 h) before ending up building vision pipelines.",
-        "sheet.exp": "EXP {total} contributions · {active}/{window} active days",
+        "sheet.exp": "EXP {total} contributions · {active} active days",
         "ach.title": "ACHIEVEMENTS UNLOCKED",
         "ach.toast": "Achievement unlocked!",
         "ach.best_day": "{n} contributions in a single day",
@@ -225,14 +225,14 @@ COPY: dict[str, dict[str, str]] = {
             "$ whoami, Diego · backend, vision & data, $ cat languages.txt, "
             "Python TS C/C++ Go Rust PHP Java, $ ./conteobk --cam 03, "
             "> YOLO model loaded... OK, > pipeline running. "
-            "Next to the terminal, a pixel art camera detects people and counts them as PEOPLE."
+            "Next to the terminal, a pixel art camera detects people walking past and keeps a running PEOPLE count."
         ),
         "alt.sheet": (
             "Character sheet. Class: Backend, computer vision and data. "
             "Guild: Radimer Seguridad, since 2025. Base: Bilbao, Spain. "
             "Origin: I went through game dev with Unity (300 h) before ending up building vision pipelines. "
             "Languages: Spanish (native), English (B2), Basque (B2). Skills: Python 29.0%, TypeScript 28.9%, C / C++ 20.7%, Go 5.7%, PHP 3.6%, Rust 2.8%. "
-            "EXP {total} contributions, {active} of {window} days active."
+            "EXP {total} contributions, {active} active days."
         ),
         "alt.achievements": (
             "Achievements unlocked: {best} contributions in a single day; 36 languages across my repos; "

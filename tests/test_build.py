@@ -2,6 +2,7 @@ import re
 import shutil
 import tempfile
 import unittest
+import xml.etree.ElementTree as ET
 from html import escape
 from html.parser import HTMLParser
 from unittest import mock
@@ -88,9 +89,22 @@ class BuildTests(unittest.TestCase):
             self.assertIn(fmt_int(live.best_day, lang), joined)
             ach = [a for a in alts if "ogros" in a or "chievements" in a]
             self.assertTrue(ach)
-            self.assertIn(escape(streak_text(lang, live), quote=True), ach[0])
+            streak = streak_text(lang, live)            # a mitad de frase, en minúscula
+            self.assertIn(escape(streak[0].lower() + streak[1:], quote=True), ach[0])
         self.assertIn(fmt_int(live.total, "es"), render_readme("es"))
         self.assertIn(fmt_int(live.total, "en"), render_readme("en"))
+
+    def test_readme_alts_match_svg_titles(self):
+        live = load_live(Path("data/live.json"), refresh=False, token=None)
+        for lang in LANGS:
+            p = _Imgs()
+            p.feed(render_readme(lang, live))
+            alts = {Path(dict(a)["src"]).name: dict(a)["alt"] for a in p.imgs}
+            svgs = render_all(lang, live)
+            for name in ("hero.svg", "sheet.svg", "achievements.svg", "inventory.svg",
+                         "highscore.svg", "bilbao.svg"):
+                title = ET.fromstring(svgs[name]).find("{*}title").text
+                self.assertEqual(alts[name], title, (lang, name))
 
     def test_img_attributes_parse_cleanly(self):
         for lang in LANGS:
