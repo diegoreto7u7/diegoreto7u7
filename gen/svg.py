@@ -69,6 +69,8 @@ def balanced_wrap(s, font, size, max_width) -> list[str]:
     """
     greedy = wrap(s, font, size, max_width)
     words = s.split()
+    if not words:
+        return greedy
     best, best_w = greedy, max((text_width(line, font, size) for line in greedy), default=0)
     for cuts in combinations(range(1, len(words)), len(greedy) - 1):
         bounds = (0, *cuts, len(words))

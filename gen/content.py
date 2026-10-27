@@ -69,6 +69,9 @@ QUESTS: list[Quest] = [
 # En la stack EN, «IA» se escribe «AI».
 _STACK_EN = {"licitaciones": "Laravel · React · PostgreSQL · AI"}
 
+REPO = "diegoreto7u7/diegoreto7u7"
+BRANCH = "main"
+
 _SITE = "https://diegoret.pages.dev"
 URLS: dict[str, dict[str, str]] = {
     "es": {
@@ -76,7 +79,7 @@ URLS: dict[str, dict[str, str]] = {
         "cv": f"{_SITE}/cv-diego-orue.pdf",
         "linkedin": "https://www.linkedin.com/in/diegoret",
         "email": "mailto:orueret@gmail.com",
-        "lang": "https://github.com/diegoreto7u7/diegoreto7u7/blob/main/README.en.md",
+        "lang": f"https://github.com/{REPO}/blob/{BRANCH}/README.en.md",
         **{f"quest.{q.slug}": f"{_SITE}/proyectos/{q.slug}/" for q in QUESTS},
     },
     "en": {

@@ -15,7 +15,7 @@ from gen.live import LiveStats, compute_stats
 from gen.scenes.sheet import segments
 from gen.svg import balanced_wrap, text_width, wrap
 from gen.svgcheck import check_svg
-from tests.helpers import LIVE, days_with_current_streak
+from tests.helpers import LIVE, YEAR_DAYS, YEAR_LIVE, days_with_current_streak
 
 SNAPSHOT = Path(__file__).parent / "fixtures" / "desktop_snapshot.json"
 MOBILE = ("m-hero.svg", "m-quests-title.svg", "m-quests-more.svg", "m-start.svg",
@@ -30,11 +30,16 @@ SVG_NS = "{http://www.w3.org/2000/svg}"
 def desktop_hashes() -> dict[str, str]:
     """sha256 de cada SVG de escritorio (no m-*) de los dos idiomas, renderizado con LIVE.
 
-    Con LIVE y no con data/live.json, que el bot reescribe cada día.
+    Con LIVE y no con data/live.json, que el bot reescribe cada día. Además, con YEAR_LIVE (400
+    días fijos) con la clave `<lang>/<nombre>@year`, para ejercitar los recortes anuales.
     """
-    return {f"{lang}/{name}": hashlib.sha256(svg.encode("utf-8")).hexdigest()
-            for lang in LANGS for name, svg in sorted(render_all(lang, LIVE).items())
-            if not name.startswith("m-")}
+    out = {}
+    for suffix, live in (("", LIVE), ("@year", YEAR_LIVE)):
+        for lang in LANGS:
+            for name, svg in sorted(render_all(lang, live).items()):
+                if not name.startswith("m-"):
+                    out[f"{lang}/{name}{suffix}"] = hashlib.sha256(svg.encode("utf-8")).hexdigest()
+    return out
 
 
 def write_snapshot() -> None:
@@ -112,8 +117,10 @@ class MobileTests(unittest.TestCase):
                     self.assertIn(name[2:], sorted(self.out[lang]), lang)
 
     def test_desktop_unchanged_vs_snapshot(self):
-        # el fixture se generó con el código anterior a las variantes móviles: un retoque móvil
-        # no puede cambiar ni un byte del escritorio
+        # un retoque móvil no puede cambiar ni un byte del escritorio. Los hashes se generaron con
+        # el código anterior a las variantes móviles, salvo los <title> del hero, que cambiaron a
+        # propósito (R3: un solo alt para escritorio y móvil). Las claves @year (YEAR_LIVE) se
+        # añadieron después y se comprobaron igual contra ese código previo.
         snap = json.loads(SNAPSHOT.read_text(encoding="utf-8"))
         got = desktop_hashes()
         self.assertEqual(sorted(got), sorted(snap))
@@ -335,14 +342,14 @@ class MobileTests(unittest.TestCase):
 
     def test_mobile_quest_cards(self):
         for lang in LANGS:
-            heights = set()
+            heights = []
             for q in QUESTS:
                 name = f"m-quest-{q.slug}.svg"
                 svg = self.out[lang][name]
                 self.assertEqual(check_svg(svg), [], (lang, name))
                 vb = ET.fromstring(svg).get("viewBox")
                 self.assertTrue(vb.startswith(f"0 0 {CARD_W} "), (lang, name, vb))
-                heights.add(_height(svg))
+                heights.append(_height(svg))
                 # mismas palabras que la tarjeta de escritorio
                 self.assertEqual(Counter(_words(svg)),
                                  Counter(_words(self.out[lang][f"quest-{q.slug}.svg"])),
@@ -353,8 +360,9 @@ class MobileTests(unittest.TestCase):
                     self.assertLessEqual(right, CARD_W - 10, (lang, name, text))
                 self.assertIn('class="blink"', svg)                       # el ▼
                 self.assertEqual('fill="#fff2b3"' in svg, q.starred, (lang, name))   # la estrella
-            # las cuatro igual de altas: en el móvil van de dos en dos y las filas cuadran
-            self.assertEqual(len(heights), 1, (lang, heights))
+            # en el móvil van de dos en dos: las tarjetas de una fila igual de altas
+            self.assertEqual(heights[0], heights[1], (lang, heights))
+            self.assertEqual(heights[2], heights[3], (lang, heights))
 
     def test_mobile_quest_card_stacks_title_summary_stack_status(self):
         for lang in LANGS:
@@ -363,8 +371,9 @@ class MobileTests(unittest.TestCase):
                 texts = list(root.iter(SVG_NS + "text"))
                 title = texts[0]
                 self.assertEqual(title.text, q.title[lang])
-                # ps2p 16 si cabe en 168; si no, vt323 de 26 o más
-                if text_width(q.title[lang], "ps2p", 16) <= CARD_W - 32:
+                # una sola fuente de título por idioma: ps2p 16 si caben todos en 168; si no,
+                # vt323 de 26 o más en las cuatro
+                if all(text_width(p.title[lang], "ps2p", 16) <= CARD_W - 32 for p in QUESTS):
                     self.assertEqual((title.get("font-family"), title.get("font-size")),
                                      ("ps2p", "16"), (lang, q.slug))
                 else:
@@ -467,6 +476,10 @@ class BalancedWrapTests(unittest.TestCase):
                          ["PULSA START PARA HABLAR", "CONMIGO"])
         self.assertEqual(balanced_wrap("PULSA START PARA HABLAR CONMIGO", "ps2p", 16, 374),
                          ["PULSA START PARA", "HABLAR CONMIGO"])
+
+    def test_empty_input(self):
+        self.assertEqual(balanced_wrap("", "vt323", 22, 400), wrap("", "vt323", 22, 400))
+        self.assertEqual(balanced_wrap("   ", "vt323", 22, 400), [])
 
     def test_single_line_when_it_fits(self):
         self.assertEqual(balanced_wrap("uno dos", "vt323", 22, 400), ["uno dos"])

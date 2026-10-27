@@ -2,13 +2,25 @@ import unittest
 import xml.etree.ElementTree as ET
 
 from gen.content import COPY, LANGS
-from gen.scenes.hero import render
-from gen.svg import escape
+from gen.scenes.hero import DESKTOP, MOBILE, render
+from gen.svg import escape, text_width
 from gen.svgcheck import check_svg
 from tests.helpers import LIVE
 
 
 class TestSceneHero(unittest.TestCase):
+    def test_role_clears_the_cat_and_its_zs(self):
+        # el rol (vt323 26, x = 8, línea base 76) no puede tocar al gato ni a sus «z». El gato
+        # (cabeza en top - 24) no se solapa con el rol y las «z» (la primera en cat_x + 58)
+        # quedan a la derecha de su final.
+        for lang in LANGS:
+            right = 8 + text_width(COPY[lang]["hero.role"], "vt323", 26)
+            for lay in (DESKTOP, MOBILE):
+                self.assertLess(right, lay.cat_x + 58, (lang, lay.w))
+                # el gato: o está más a la derecha que el rol, o más abajo que su descenso
+                self.assertTrue(right < lay.cat_x or lay.top - 8 * 3 >= 76 + 0.25 * 26,
+                                (lang, lay.w))
+
     def test_hero_valid_both_langs(self):
         for lang in LANGS:
             svg = render(lang, LIVE)["hero.svg"]

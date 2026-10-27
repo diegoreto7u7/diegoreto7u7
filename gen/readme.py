@@ -3,7 +3,7 @@
 from html import escape
 from pathlib import Path
 
-from .content import COPY, PROJECT_TOTAL, QUESTS, URLS, fmt_int
+from .content import BRANCH, COPY, PROJECT_TOTAL, REPO, QUESTS, URLS, fmt_int
 from .live import LiveStats, load_live
 from .scenes import achievements
 
@@ -12,7 +12,7 @@ DEFAULT_LIVE = Path(__file__).resolve().parent.parent / "data" / "live.json"
 # menos, el <source> elige la variante. El srcset es absoluto porque GitHub reescribe el src
 # relativo de un <img>, pero no hay garantía de que haga lo mismo con el de un <source>.
 MOBILE_MEDIA = "(max-width: 600px)"
-RAW_BASE = "https://github.com/diegoreto7u7/diegoreto7u7/raw/main/"
+RAW_BASE = f"https://github.com/{REPO}/raw/{BRANCH}/"
 
 
 def _a(s: str) -> str:

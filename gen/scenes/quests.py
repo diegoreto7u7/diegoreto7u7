@@ -76,14 +76,16 @@ def _card(q: Quest, lang: str) -> str:
                     fonts=("ps2p", "vt323"), bg=BG)
 
 
-def _m_title_font(title: str) -> tuple[str, int]:
-    """ps2p 16 como en escritorio; si no cabe en M_ROOM, vt323 a 28 o a 26 (más estrecha)."""
-    if text_width(title, "ps2p", 16) <= M_ROOM:
+def _m_title_font(lang: str) -> tuple[str, int]:
+    """Una sola fuente de título para las cuatro tarjetas móviles de un idioma: ps2p 16 como en
+    escritorio si todos los títulos caben en M_ROOM; si no, vt323 a 28 o a 26 (más estrecha)."""
+    titles = [q.title[lang] for q in QUESTS]
+    if all(text_width(t, "ps2p", 16) <= M_ROOM for t in titles):
         return "ps2p", 16
     for size in (28, 26):
-        if text_width(title, "vt323", size) <= M_ROOM:
+        if all(text_width(t, "vt323", size) <= M_ROOM for t in titles):
             return "vt323", size
-    raise ValueError(f"el título {title!r} no cabe en la tarjeta móvil")
+    raise ValueError(f"los títulos {titles!r} no caben en la tarjeta móvil")
 
 
 def _m_lines(q: Quest, lang: str) -> tuple[list[str], list[str], list[str]]:
@@ -104,11 +106,12 @@ def _m_foot(stack: list[str], status: list[str]) -> int:
             + 8 + DOWN_H + M_PAD)
 
 
-def _m_height(lang: str) -> int:
-    """Alto común de las tarjetas móviles de un idioma: el de la que más ocupa. En el móvil van de
-    dos en dos, y con el mismo alto las filas cuadran."""
-    return max(M_TITLE + 32 + M_LINE * (len(summary) - 1) + 30 + _m_foot(stack, status)
-               for summary, stack, status in (_m_lines(q, lang) for q in QUESTS))
+def _m_heights(lang: str) -> list[int]:
+    """Alto de cada tarjeta móvil: en el móvil van de dos en dos (tarjetas 0-1 y 2-3), y las de una
+    fila comparten el alto de la que más ocupa, así la fila cuadra sin dejar hueco en la otra."""
+    own = [M_TITLE + 32 + M_LINE * (len(summary) - 1) + 30 + _m_foot(stack, status)
+           for summary, stack, status in (_m_lines(q, lang) for q in QUESTS)]
+    return [max(own[i - i % 2:i - i % 2 + 2]) for i in range(len(own))]
 
 
 def _m_card(q: Quest, lang: str, h: int) -> str:
@@ -121,7 +124,7 @@ def _m_card(q: Quest, lang: str, h: int) -> str:
     if q.starred:
         star = len(STAR[0]) * 2
         body += sprite(STAR[0], STAR[1], M_PAD + ICON_BOX + 10, M_PAD + (ICON_BOX - star) // 2, 2)
-    font, size = _m_title_font(title)
+    font, size = _m_title_font(lang)
     body += text(M_PAD, M_TITLE, title, font, size, BLUE, max_width=M_ROOM)
     body += "".join(text(M_PAD, M_TITLE + 32 + i * M_LINE, line, "vt323", 22, INK, max_width=M_ROOM)
                     for i, line in enumerate(summary))
@@ -156,8 +159,8 @@ def _more(lang: str, width: int = 840) -> str:
 
 def render(lang: str, live: LiveStats) -> dict[str, str]:
     out = {f"quest-{q.slug}.svg": _card(q, lang) for q in QUESTS}
-    h = _m_height(lang)
-    out.update({f"m-quest-{q.slug}.svg": _m_card(q, lang, h) for q in QUESTS})
+    out.update({f"m-quest-{q.slug}.svg": _m_card(q, lang, h)
+                for q, h in zip(QUESTS, _m_heights(lang))})
     out["quests-title.svg"] = _title(lang)
     out["quests-more.svg"] = _more(lang)
     out["m-quests-title.svg"] = _title(lang, MOBILE_W)
