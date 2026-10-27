@@ -30,11 +30,21 @@ se recalculan solas. El largo del pelo y el tono de piel son valores por defecto
 Cada bloque del README es una escena en `gen/scenes/` (hero, buttons, quests, sheet, achievements,
 inventory, highscore, footer).
 
-Variantes móviles: las escenas generan también `m-<nombre>.svg` (de momento hero, quests-title,
-quests-more, start, sheet, achievements e inventory) con 420 de ancho (`MOBILE_W` en
-`gen/scenes/common.py`) y la misma información, apilada o partida en líneas.
+Variantes móviles: cada imagen del README, salvo los botones y Bilbao, tiene una gemela
+`m-<nombre>.svg` con la misma información, apilada o partida en líneas. Van a 420 de ancho
+(`MOBILE_W` en `gen/scenes/common.py`), menos las tarjetas de misión (`m-quest-*.svg`), que miden
+200 porque en el README van al 49 %. El high score móvil enseña solo las últimas 26 semanas (los
+marcadores siguen siendo del año). En el README cada una va en un
+`<picture><source media="(max-width: 600px)" srcset="…">` con la imagen de escritorio en el `<img>`
+y un solo alt para las dos, así que el `<title>` de la variante es el mismo que el de escritorio.
+El `srcset` es una URL absoluta (`RAW_BASE` en `gen/readme.py`, `…/raw/main/`), porque GitHub
+reescribe el `src` relativo de un `<img>`, pero no hay garantía de que lo haga con el de un
+`<source>`. Por eso el móvil ve lo que hay en `main` en GitHub, no lo que tengas en local:
+`tools/preview.py page` cambia esas URLs por los archivos locales.
 Las dos maquetaciones de cada escena son los `Layout` `DESKTOP` y `MOBILE` de su módulo (hero,
-sheet, achievements e inventory): para mover algo solo en el móvil se toca `MOBILE`.
+sheet, achievements, inventory y highscore; las tarjetas de misión tienen `_card` y `_m_card`):
+para mover algo solo en el móvil se toca `MOBILE`. Las cabeceras de sección de un mismo ancho van
+todas al mismo tamaño (`header_size`: 20 en escritorio y 18 en el móvil).
 `tests/fixtures/desktop_snapshot.json` guarda el sha256 de cada SVG de escritorio, así que un
 retoque móvil no puede cambiar el escritorio sin que falle un test. Si cambias el escritorio a
 propósito (un texto de `content.py`, por ejemplo), regenera el fixture y revisa el diff:

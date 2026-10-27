@@ -79,6 +79,16 @@ def balanced_wrap(s, font, size, max_width) -> list[str]:
     return best
 
 
+def wrap_keep(s, font, size, max_width, wrapper=wrap) -> list[str]:
+    """Como `wrap` (o `wrapper`), pero sin partir lo que va entre paréntesis («(300 h)» queda en
+    una línea) y sin empezar una línea con «·»: el separador se queda al final de la anterior."""
+    out, depth = [], 0
+    for ch in s.replace(" · ", "\0· "):
+        depth += (ch == "(") - (ch == ")")
+        out.append("\0" if ch == " " and depth > 0 else ch)
+    return [line.replace("\0", " ") for line in wrapper("".join(out), font, size, max_width)]
+
+
 def document(width: int, height: int, title: str, body: str, css: str = "",
              fonts: Iterable[str] = (), bg: str = "#0d1117") -> str:
     style = font_face_css(fonts)

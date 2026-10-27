@@ -17,7 +17,7 @@ from gen.pixel import rects, sprite, two_frames
 from gen.scenes.common import BLINK_CSS, MOBILE_W, header
 from gen.sprites.avatar import AVATAR_A, AVATAR_B, AVATAR_BLINK, PALETTE
 from gen.sprites.misc import HEART_OFF, HEART_ON, MUG
-from gen.svg import balanced_wrap, document, rect, text, text_width, wrap
+from gen.svg import balanced_wrap, document, rect, text, text_width, wrap, wrap_keep
 
 BG, FRAME, TRACK = "#0d1117", "#30363d", "#21262d"
 PAPER, LIGHT, KEY = "#f0f6fc", "#c9d1d9", "#7d8590"
@@ -124,13 +124,8 @@ def _avatar(y: float, lay: Layout) -> tuple[str, str]:
 
 
 def _wrap_keep(s: str, max_width: float, wrapper=wrap) -> list[str]:
-    """Como wrap() (o `wrapper`), pero sin partir lo que va entre paréntesis («(300 h)» queda en
-    una línea) y sin empezar una línea con «·»: el separador se queda al final de la anterior."""
-    out, depth = [], 0
-    for ch in s.replace(" · ", "\0· "):
-        depth += (ch == "(") - (ch == ")")
-        out.append("\0" if ch == " " and depth > 0 else ch)
-    return [line.replace("\0", " ") for line in wrapper("".join(out), "vt323", 26, max_width)]
+    """`wrap_keep` en vt323 26, la letra de los valores y de la etiqueta de EXP."""
+    return wrap_keep(s, "vt323", 26, max_width, wrapper)
 
 
 def _key(lay: Layout, y: float, key: str) -> str:

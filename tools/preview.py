@@ -8,7 +8,9 @@
 en una página con github-markdown-css y `<base href>` en la raíz del repo, y la captura entera en
 `preview/<lang>-<tema>-<ancho>.png`. Las imágenes son `<img>`: se ven en su primer fotograma.
 Anchos por defecto: 830 (escritorio), 358 y 276 (la columna real del README en la app y la web
-móvil de GitHub).
+móvil de GitHub). Hasta 600 px, cada `<picture>` muestra su variante móvil (m-*.svg); su `srcset`
+apunta a GitHub (RAW_BASE, en gen/readme.py), y la vista previa lo cambia por los archivos locales
+para ver lo que aún no se ha subido.
 
 `frames` mete el SVG en línea en un HTML, pausa todas sus animaciones en cada segundo pedido y
 captura `preview/<x>@<t>.png`. El tiempo `rm` captura el estado con movimiento reducido.
@@ -25,6 +27,9 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(ROOT))
+from gen.readme import RAW_BASE  # noqa: E402
+
 OUT = ROOT / "preview"
 CHROME = (Path.home() / ".cache/ms-playwright/chromium_headless_shell-1248"
           / "chrome-headless-shell-linux64/chrome-headless-shell")
@@ -72,7 +77,8 @@ def page(args) -> list[Path]:
     OUT.mkdir(exist_ok=True)
     shots = []
     for lang in args.lang:
-        fragment = gfm(ROOT / READMES[lang])
+        # los srcset absolutos de las variantes móviles, a los archivos locales (<base href>)
+        fragment = gfm(ROOT / READMES[lang]).replace(f'srcset="{RAW_BASE}', 'srcset="')
         for theme in args.theme:
             for width in args.width:
                 name = f"{lang}-{theme}-{width}"

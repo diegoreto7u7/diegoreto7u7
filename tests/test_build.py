@@ -12,7 +12,7 @@ from gen.build import build, render_all
 from gen.content import LANGS, fmt_int
 from gen.scenes.achievements import streak_text
 from gen.live import load_live
-from gen.readme import render_readme
+from gen.readme import MOBILE_MEDIA, RAW_BASE, render_readme
 
 
 def _copy_data(out: Path) -> None:
@@ -20,13 +20,25 @@ def _copy_data(out: Path) -> None:
 
 
 class _Imgs(HTMLParser):
+    """Los <img> y los <source> del README; cada <picture> con los suyos."""
+
     def __init__(self):
         super().__init__()
-        self.imgs = []
+        self.imgs, self.sources, self.pictures = [], [], []
+        self._open = None                       # el <picture> abierto, si lo hay
 
     def handle_starttag(self, tag, attrs):
-        if tag == "img":
-            self.imgs.append(attrs)
+        if tag == "picture":
+            self._open = {"sources": [], "imgs": []}
+            self.pictures.append(self._open)
+        elif tag in ("img", "source"):
+            (self.imgs if tag == "img" else self.sources).append(attrs)
+            if self._open is not None:
+                self._open[tag + "s"].append(dict(attrs))
+
+    def handle_endtag(self, tag):
+        if tag == "picture":
+            self._open = None
 
 
 class BuildTests(unittest.TestCase):
@@ -78,6 +90,41 @@ class BuildTests(unittest.TestCase):
             for src in re.findall(r'src="assets/([^/]+)/([^"]+)"', md):
                 self.assertEqual(src[0], lang)
                 self.assertIn(src[1], rendered)
+            # las variantes móviles de los <source>, con su URL absoluta
+            srcsets = re.findall(r'srcset="([^"]*)"', md)
+            self.assertTrue(srcsets, lang)
+            for srcset in srcsets:
+                m = re.fullmatch(re.escape(RAW_BASE) + r"assets/([^/]+)/(m-[^/]+\.svg)", srcset)
+                self.assertTrue(m, srcset)
+                self.assertEqual(m.group(1), lang)
+                self.assertIn(m.group(2), rendered)
+
+    def test_picture_sources_absolute(self):
+        # GitHub reescribe el src relativo de un <img>, pero no hay garantía de que lo haga con
+        # el srcset de un <source>: va absoluto
+        self.assertEqual(RAW_BASE, "https://github.com/diegoreto7u7/diegoreto7u7/raw/main/")
+        self.assertEqual(MOBILE_MEDIA, "(max-width: 600px)")
+        live = load_live(Path("data/live.json"), refresh=False, token=None)
+        for lang in LANGS:
+            rendered = set(render_all(lang, live))
+            p = _Imgs()
+            p.feed(render_readme(lang, live))
+            self.assertTrue(p.pictures, lang)
+            self.assertEqual(len(p.sources), sum(len(pic["sources"]) for pic in p.pictures))
+            used = set()
+            for pic in p.pictures:
+                self.assertEqual((len(pic["sources"]), len(pic["imgs"])), (1, 1), (lang, pic))
+                source, img = pic["sources"][0], pic["imgs"][0]
+                self.assertEqual(source["media"], MOBILE_MEDIA)
+                desktop = Path(img["src"]).name
+                self.assertEqual(img["src"], f"assets/{lang}/{desktop}")
+                self.assertEqual(source["srcset"], f"{RAW_BASE}assets/{lang}/m-{desktop}")
+                self.assertIn(f"m-{desktop}", rendered)
+                used.add(f"m-{desktop}")
+            # cada variante móvil sale en el README y solo se quedan sin ella los botones y Bilbao
+            self.assertEqual(used, {n for n in rendered if n.startswith("m-")}, lang)
+            plain = {Path(dict(a)["src"]).name for a in p.imgs} - {n[2:] for n in used}
+            self.assertEqual({n for n in plain if not n.startswith("btn-")}, {"bilbao.svg"})
 
     def test_alts_are_escaped_and_filled(self):
         live = load_live(Path("data/live.json"), refresh=False, token=None)
@@ -122,6 +169,14 @@ class BuildTests(unittest.TestCase):
                 self.assertLessEqual(set(names), {"src", "alt", "width", "height"})
                 self.assertEqual(len(names), len(set(names)))
                 self.assertTrue(dict(attrs).get("alt"))
+            self.assertEqual(len(p.sources), md.count("<source"))
+            self.assertEqual(len(p.pictures), md.count("<picture>"))
+            self.assertEqual(md.count("<picture"), md.count("</picture>"))
+            for attrs in p.sources:
+                names = [k for k, _ in attrs]
+                self.assertLessEqual(set(names), {"media", "srcset"})
+                self.assertEqual(len(names), len(set(names)))
+                self.assertTrue(all(v for _, v in attrs))
 
     def test_build_fails_on_invalid_svg_and_writes_nothing(self):
         from gen.scenes import hero

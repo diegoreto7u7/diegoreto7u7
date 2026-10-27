@@ -1,4 +1,4 @@
-"""Variantes móviles (m-*.svg): lienzo de 420, mismo contenido y escritorio intacto."""
+"""Variantes móviles (m-*.svg): 420 de ancho (tarjetas, 200), mismo contenido y escritorio intacto."""
 
 import hashlib
 import json
@@ -6,10 +6,11 @@ import re
 import unittest
 import xml.etree.ElementTree as ET
 from collections import Counter
+from datetime import date, timedelta
 from pathlib import Path
 
 from gen.build import render_all
-from gen.content import COPY, INVENTORY, LANGS, SKILLS, fmt_int
+from gen.content import COPY, INVENTORY, LANGS, QUESTS, SKILLS, fmt_int, quest_stack
 from gen.live import LiveStats, compute_stats
 from gen.scenes.sheet import segments
 from gen.svg import balanced_wrap, text_width, wrap
@@ -18,8 +19,10 @@ from tests.helpers import LIVE, days_with_current_streak
 
 SNAPSHOT = Path(__file__).parent / "fixtures" / "desktop_snapshot.json"
 MOBILE = ("m-hero.svg", "m-quests-title.svg", "m-quests-more.svg", "m-start.svg",
-          "m-sheet.svg", "m-achievements.svg", "m-inventory.svg")
+          "m-sheet.svg", "m-achievements.svg", "m-inventory.svg", "m-highscore.svg")
+CARDS = tuple(f"m-quest-{q.slug}.svg" for q in QUESTS)   # tarjetas: 200 de ancho, se ven al 49 %
 M_W = 420
+CARD_W = 200
 PHONE = 276          # ancho real de la columna del README en el móvil, en px CSS
 SVG_NS = "{http://www.w3.org/2000/svg}"
 
@@ -41,6 +44,14 @@ def write_snapshot() -> None:
     """
     SNAPSHOT.write_text(json.dumps(desktop_hashes(), indent=2, sort_keys=True) + "\n",
                         encoding="utf-8", newline="\n")
+
+
+def _width(svg: str) -> float:
+    return float(ET.fromstring(svg).get("viewBox").split()[2])
+
+
+def _height(svg: str) -> float:
+    return float(ET.fromstring(svg).get("viewBox").split()[3])
 
 
 def _texts(svg: str) -> list[str]:
@@ -120,18 +131,51 @@ class MobileTests(unittest.TestCase):
                     self.assertEqual(check_svg(out[name]), [], (lang, name))
                     for text, left, right in _text_spans(out[name]):
                         self.assertGreaterEqual(left, 0, (lang, name, text))
-                        self.assertLessEqual(right, M_W, (lang, name, text))
+                        self.assertLessEqual(right, _width(out[name]), (lang, name, text))
             # las cifras grandes salen enteras (partidas en líneas si hace falta)
-            words = _words(out["m-sheet.svg"]) + _words(out["m-achievements.svg"])
+            words = (_words(out["m-sheet.svg"]) + _words(out["m-achievements.svg"])
+                     + _words(out["m-highscore.svg"]))
             self.assertIn(fmt_int(1_234_567, lang), words, lang)
             self.assertIn(fmt_int(9_999, lang), words, lang)
 
     def test_mobile_text_stays_inside_canvas(self):
         for lang in LANGS:
-            for name in MOBILE:
-                for text, left, right in _text_spans(self.out[lang][name]):
+            for name in MOBILE + CARDS:
+                svg = self.out[lang][name]
+                for text, left, right in _text_spans(svg):
                     self.assertGreaterEqual(left, 0, (lang, name, text))
-                    self.assertLessEqual(right, M_W, (lang, name, text))
+                    self.assertLessEqual(right, _width(svg), (lang, name, text))
+
+    def test_mobile_titles_match_desktop(self):
+        # el README lleva un solo alt para las dos versiones: el <title> tiene que ser el mismo
+        for lang in LANGS:
+            for name, svg in self.out[lang].items():
+                if name.startswith("m-"):
+                    self.assertEqual(ET.fromstring(svg).find("{*}title").text,
+                                     ET.fromstring(self.out[lang][name[2:]]).find("{*}title").text,
+                                     (lang, name))
+
+    def test_mobile_headers_same_size(self):
+        # todas las cabeceras móviles al mismo tamaño: el mayor al que caben todos los títulos
+        # (18, por «LOGROS DESBLOQUEADOS»); las de escritorio siguen a 20
+        def sizes(mobile: bool) -> set[tuple[str, str]]:
+            out = set()
+            for lang in LANGS:
+                for name, svg in self.out[lang].items():
+                    if name.startswith("m-") != mobile:
+                        continue
+                    for t in ET.fromstring(svg).iter(SVG_NS + "text"):
+                        if (t.get("x"), t.get("y"), t.get("font-family")) == ("28", "34", "ps2p"):
+                            out.add((name, t.get("font-size")))
+            return out
+
+        mobile, desktop = sizes(True), sizes(False)
+        self.assertEqual({n for n, _ in mobile},
+                         {"m-quests-title.svg", "m-sheet.svg", "m-achievements.svg",
+                          "m-inventory.svg", "m-highscore.svg"})
+        self.assertEqual({s for _, s in mobile}, {"18"})
+        self.assertEqual(len(desktop), 5)
+        self.assertEqual({s for _, s in desktop}, {"20"})
 
     def test_mobile_hero_same_content(self):
         # mismo contenido que el escritorio: solo cambia la maquetación
@@ -287,11 +331,125 @@ class MobileTests(unittest.TestCase):
         for dx, _ in moves:                                      # el marco no se sale del lienzo
             self.assertLessEqual(right + float(dx), M_W)
 
+    # --- tarjetas de misión ---
+
+    def test_mobile_quest_cards(self):
+        for lang in LANGS:
+            heights = set()
+            for q in QUESTS:
+                name = f"m-quest-{q.slug}.svg"
+                svg = self.out[lang][name]
+                self.assertEqual(check_svg(svg), [], (lang, name))
+                vb = ET.fromstring(svg).get("viewBox")
+                self.assertTrue(vb.startswith(f"0 0 {CARD_W} "), (lang, name, vb))
+                heights.add(_height(svg))
+                # mismas palabras que la tarjeta de escritorio
+                self.assertEqual(Counter(_words(svg)),
+                                 Counter(_words(self.out[lang][f"quest-{q.slug}.svg"])),
+                                 (lang, name))
+                # el texto queda dentro del marco (borde interior en 10 y en 190)
+                for text, left, right in _text_spans(svg):
+                    self.assertGreaterEqual(left, 10, (lang, name, text))
+                    self.assertLessEqual(right, CARD_W - 10, (lang, name, text))
+                self.assertIn('class="blink"', svg)                       # el ▼
+                self.assertEqual('fill="#fff2b3"' in svg, q.starred, (lang, name))   # la estrella
+            # las cuatro igual de altas: en el móvil van de dos en dos y las filas cuadran
+            self.assertEqual(len(heights), 1, (lang, heights))
+
+    def test_mobile_quest_card_stacks_title_summary_stack_status(self):
+        for lang in LANGS:
+            for q in QUESTS:
+                root = ET.fromstring(self.out[lang][f"m-quest-{q.slug}.svg"])
+                texts = list(root.iter(SVG_NS + "text"))
+                title = texts[0]
+                self.assertEqual(title.text, q.title[lang])
+                # ps2p 16 si cabe en 168; si no, vt323 de 26 o más
+                if text_width(q.title[lang], "ps2p", 16) <= CARD_W - 32:
+                    self.assertEqual((title.get("font-family"), title.get("font-size")),
+                                     ("ps2p", "16"), (lang, q.slug))
+                else:
+                    self.assertEqual(title.get("font-family"), "vt323", (lang, q.slug))
+                    self.assertGreaterEqual(float(title.get("font-size")), 26, (lang, q.slug))
+                # el icono va encima del título
+                icon = root.find(SVG_NS + "g")
+                icon_bottom = max(float(r.get("y")) + float(r.get("height")) for r in _rects(icon))
+                self.assertLess(icon_bottom, float(title.get("y")) - 16, (lang, q.slug))
+                # de arriba abajo: título, resumen, stack y estado
+                ys = [float(t.get("y")) for t in texts]
+                self.assertEqual(ys, sorted(ys), (lang, q.slug))
+                words = " ".join(t.text for t in texts[1:]).split()
+                summary, stack = q.summary[lang].split(), quest_stack(q, lang).split()
+                self.assertEqual(words, summary + stack + q.status[lang].split(), (lang, q.slug))
+                # al partir la stack, el «·» se queda al final de la línea
+                self.assertFalse([t.text for t in texts if t.text.startswith("·")], (lang, q.slug))
+
+    # --- high score ---
+
+    def test_mobile_highscore_26_weeks(self):
+        days = _days(400)
+        year = compute_stats(days)
+        for live in (LIVE, year):
+            for lang in LANGS:
+                out = render_all(lang, live)
+                svg = out["m-highscore.svg"]
+                cells = svg.count('class="cell')
+                self.assertGreater(cells, 0)
+                self.assertLessEqual(cells, 26 * 7, lang)
+                # los mismos días con el mismo color que en escritorio (los últimos)
+                lv = lambda s: re.findall(r'class="cell (l\d)', s)  # noqa: E731
+                self.assertEqual(lv(svg), lv(out["highscore.svg"])[-cells:], lang)
+        svg = render_all("es", year)["m-highscore.svg"]
+        self.assertEqual(svg.count('class="cell'), 7 * 25 + _row_of(days[-1][0]) + 1)
+        xs = {float(x) for x in re.findall(r'class="cell[^"]*" x="([\d.]+)"', svg)}
+        self.assertEqual(len(xs), 26)
+        self.assertGreaterEqual(min(xs), 8)                             # dentro del marco
+        self.assertLessEqual(max(xs) + 12, M_W - 8)
+
+    def test_mobile_highscore_same_pacman_logic(self):
+        for lang in LANGS:
+            m, d = self.out[lang]["m-highscore.svg"], self.out[lang]["highscore.svg"]
+            self.assertEqual(m.count('class="run'), 4)                  # Pac-Man y 3 fantasmas
+            self.assertEqual(m.count('class="run'), d.count('class="run'))
+            for rule in (".run{animation:run 24s linear infinite}",
+                         ".face{animation:face 24s step-end infinite}",
+                         "@keyframes run{", "@keyframes face{"):
+                self.assertIn(rule, m, (lang, rule))
+            # cada celda con contribuciones lleva su @keyframes, como en escritorio
+            self.assertEqual(len(re.findall(r'class="cell l\d e\d+"', m)),
+                             len(re.findall(r"@keyframes e\d+\{", m)))
+            # serpentina: 7 filas, una parada al principio y otra al final de cada una
+            run = re.search(r"@keyframes run\{(.*?)\}\}", m).group(1)
+            self.assertEqual(len(re.findall(r"translate\(", run)), 2 * 7 + 1)
+
+    def test_mobile_highscore_scores_stacked(self):
+        for lang in LANGS:
+            svg = self.out[lang]["m-highscore.svg"]
+            c = COPY[lang]
+            score = c["hs.score"].format(total=fmt_int(LIVE.total, lang))
+            best = c["hs.best"].format(n=fmt_int(LIVE.best_day, lang))
+            texts = {t.text: t for t in ET.fromstring(svg).iter(SVG_NS + "text")}
+            self.assertLess(float(texts[score].get("y")), float(texts[best].get("y")))
+            self.assertEqual((texts[best].get("font-family"), texts[best].get("font-size")),
+                             ("vt323", "32"))
+            # la rejilla empieza bajo el récord
+            first = min(float(y) for y in re.findall(r'class="cell[^"]*" x="[\d.]+" y="([\d.]+)"', svg))
+            self.assertGreater(first, float(texts[best].get("y")))
+
     def test_mobile_start_splits_into_balanced_lines(self):
         texts = _texts(self.out["es"]["m-start.svg"])
         self.assertEqual(texts[:2], ["PULSA START PARA", "HABLAR CONMIGO"])
         texts = _texts(self.out["en"]["m-start.svg"])
         self.assertEqual(texts[:2], ["PRESS START TO", "GET IN TOUCH"])
+
+
+def _days(n: int) -> list[tuple[str, int]]:
+    """`n` días seguidos con contribuciones variadas (y algún cero)."""
+    start = date(2025, 9, 1)
+    return [((start + timedelta(days=i)).isoformat(), (i * 7) % 5 * (i % 3)) for i in range(n)]
+
+
+def _row_of(iso: str) -> int:
+    return (date.fromisoformat(iso).weekday() + 1) % 7          # domingo = 0, arriba
 
 
 class BalancedWrapTests(unittest.TestCase):
