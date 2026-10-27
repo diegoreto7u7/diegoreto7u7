@@ -1,0 +1,66 @@
+"""Documento SVG, texto medido y ajuste de líneas."""
+
+from typing import Iterable
+
+from gen.fonts import ADVANCE, CHARSET, MIN_SIZE, font_face_css
+from gen.pixel import FRAME_CSS
+
+REDUCED_MOTION = "@media (prefers-reduced-motion: reduce){*{animation:none!important}}"
+
+
+def escape(s: str) -> str:
+    return (s.replace("&", "&amp;").replace("<", "&lt;")
+            .replace(">", "&gt;").replace('"', "&quot;"))
+
+
+def _num(v: float) -> str:
+    return str(int(v)) if float(v).is_integer() else f"{v:g}"
+
+
+def text_width(s: str, font: str, size: float) -> float:
+    return len(s) * ADVANCE[font] * size
+
+
+def text(x, y, s, font, size, fill, cls="", anchor="start", max_width=None) -> str:
+    if size < MIN_SIZE[font]:
+        raise ValueError(f"tamaño {size} menor que el mínimo {MIN_SIZE[font]} de {font}")
+    bad = sorted({c for c in s if c not in CHARSET})
+    if bad:
+        raise ValueError(f"caracteres fuera del recorte de fuente: {''.join(bad)!r}")
+    if max_width is not None and text_width(s, font, size) > max_width:
+        raise ValueError(f"el texto {s!r} no cabe en {max_width}")
+    c = f' class="{cls}"' if cls else ""
+    return (f'<text x="{_num(x)}" y="{_num(y)}" font-family="{font}" '
+            f'font-size="{_num(size)}" fill="{fill}" text-anchor="{anchor}"{c}>'
+            f'{escape(s)}</text>')
+
+
+def wrap(s, font, size, max_width) -> list[str]:
+    lines: list[str] = []
+    cur = ""
+    for word in s.split():
+        trial = f"{cur} {word}" if cur else word
+        if cur and text_width(trial, font, size) > max_width:
+            lines.append(cur)
+            cur = word
+        else:
+            cur = trial
+    if cur:
+        lines.append(cur)
+    return lines
+
+
+def document(width: int, height: int, title: str, body: str, css: str = "",
+             fonts: Iterable[str] = (), bg: str = "#0d1117") -> str:
+    style = font_face_css(fonts)
+    if 'class="f1"' in body:
+        style += FRAME_CSS
+    style += css
+    if "@keyframes" in style:
+        style += REDUCED_MOTION
+    return (
+        f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width} {height}" '
+        f'width="{width}" height="{height}" role="img" shape-rendering="crispEdges">'
+        f'<title>{escape(title)}</title><style>{style}</style>'
+        f'<rect width="{width}" height="{height}" fill="{bg}"/>{body}</svg>'
+    )
