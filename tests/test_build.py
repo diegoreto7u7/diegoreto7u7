@@ -38,7 +38,12 @@ class BuildTests(unittest.TestCase):
             self.assertTrue(paths)
             for lang in LANGS:
                 self.assertTrue((out / "assets" / lang / "hero.svg").exists())
-                self.assertEqual(len(list((out / "assets" / lang).glob("*.svg"))), 18)
+                names = {p.name for p in (out / "assets" / lang).glob("*.svg")}
+                desktop = {n for n in names if not n.startswith("m-")}
+                self.assertEqual(len(desktop), 18)
+                self.assertTrue(names - desktop)                  # hay variantes móviles
+                for n in names - desktop:
+                    self.assertIn(n[2:], desktop)                 # m-<nombre de escritorio>
                 total = sum(p.stat().st_size for p in (out / "assets" / lang).glob("*.svg"))
                 self.assertLess(total, 3_000_000)
             self.assertTrue((out / "README.md").exists() and (out / "README.en.md").exists())

@@ -10,7 +10,7 @@ class FooterTests(unittest.TestCase):
     def test_footer_valid(self):
         for lang in LANGS:
             out = footer.render(lang, LIVE)
-            self.assertEqual(set(out), {"bilbao.svg", "start.svg"})
+            self.assertEqual(set(out), {"bilbao.svg", "start.svg", "m-start.svg"})
             for svg in out.values():
                 self.assertEqual(check_svg(svg), [])
 

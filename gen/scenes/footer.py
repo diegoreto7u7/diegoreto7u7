@@ -11,9 +11,9 @@ import random
 from gen.content import COPY
 from gen.live import LiveStats
 from gen.pixel import rects, sprite
-from gen.scenes.common import BLINK_CSS
+from gen.scenes.common import BLINK_CSS, MOBILE_W
 from gen.sprites.misc import ARROW
-from gen.svg import document, text, text_width
+from gen.svg import balanced_wrap, document, text, text_width
 
 W, H, SCALE = 168, 46, 5
 QUAY = 34                      # primera fila del muelle; la ría empieza en QUAY + 2
@@ -205,19 +205,27 @@ def _bilbao_svg(lang: str) -> str:
     return document(W * SCALE, H * SCALE, COPY[lang]["alt.bilbao"], body, css=CSS)
 
 
-def _start_svg(lang: str) -> str:
+def _start_svg(lang: str, width: int = START_W) -> str:
+    """«▶ PULSA START…» y el correo, centrados; si el rótulo no cabe en `width`, va en líneas
+    equilibradas alineadas tras la flecha (en el móvil, dos)."""
     label = COPY[lang]["footer.start"]
     mail = "orueret@gmail.com"
     arrow_w, gap = len(ARROW[0][0]) * 3, 12
-    total = arrow_w + gap + text_width(label, "ps2p", 16)
-    x0 = (START_W - total) / 2
+    room = width - 2 * 16 - arrow_w - gap            # 16 de margen a cada lado
+    lines = balanced_wrap(label, "ps2p", 16, room)
+    total = arrow_w + gap + max(text_width(line, "ps2p", 16) for line in lines)
+    x0 = (width - total) / 2
+    extra = (len(lines) - 1) * 26                     # alto de las líneas de más
     pal = dict(ARROW[1], A="#3fb950")
     body = (sprite(ARROW[0], pal, x0, 14, 3, "blink")
-            + text(x0 + arrow_w + gap, 30, label, "ps2p", 16, "#e6edf3", max_width=START_W - 2 * x0)
-            + text(START_W / 2, 70, mail, "vt323", 26, "#58a6ff", anchor="middle", max_width=START_W))
+            + "".join(text(x0 + arrow_w + gap, 30 + i * 26, line, "ps2p", 16, "#e6edf3",
+                           max_width=room) for i, line in enumerate(lines))
+            + text(width / 2, 70 + extra, mail, "vt323", 26, "#58a6ff", anchor="middle",
+                   max_width=width - 32))
     title = COPY[lang]["footer.start"]
-    return document(START_W, START_H, title, body, css=BLINK_CSS, fonts=("ps2p", "vt323"))
+    return document(width, START_H + extra, title, body, css=BLINK_CSS, fonts=("ps2p", "vt323"))
 
 
 def render(lang: str, live: LiveStats) -> dict[str, str]:
-    return {"bilbao.svg": _bilbao_svg(lang), "start.svg": _start_svg(lang)}
+    return {"bilbao.svg": _bilbao_svg(lang), "start.svg": _start_svg(lang),
+            "m-start.svg": _start_svg(lang, MOBILE_W)}

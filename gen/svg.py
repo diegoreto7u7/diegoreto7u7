@@ -1,5 +1,6 @@
 """Documento SVG, texto medido y ajuste de líneas."""
 
+from itertools import combinations
 from typing import Iterable
 
 from gen.fonts import ADVANCE, CHARSET, MIN_SIZE, font_face_css
@@ -58,6 +59,24 @@ def wrap(s, font, size, max_width) -> list[str]:
     if cur:
         lines.append(cur)
     return lines
+
+
+def balanced_wrap(s, font, size, max_width) -> list[str]:
+    """Las mismas líneas que `wrap`, repartidas para que la más larga sea lo más corta posible.
+
+    Evita la última línea con una palabra suelta («PULSA START PARA HABLAR» / «CONMIGO»). Prueba
+    todos los cortes, así que es para rótulos cortos, no para párrafos.
+    """
+    greedy = wrap(s, font, size, max_width)
+    words = s.split()
+    best, best_w = greedy, max((text_width(line, font, size) for line in greedy), default=0)
+    for cuts in combinations(range(1, len(words)), len(greedy) - 1):
+        bounds = (0, *cuts, len(words))
+        lines = [" ".join(words[a:b]) for a, b in zip(bounds, bounds[1:])]
+        widest = max(text_width(line, font, size) for line in lines)
+        if widest < best_w:
+            best, best_w = lines, widest
+    return best
 
 
 def document(width: int, height: int, title: str, body: str, css: str = "",

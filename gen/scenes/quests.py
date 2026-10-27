@@ -3,9 +3,9 @@
 from gen.content import COPY, PROJECT_TOTAL, QUESTS, Quest, quest_stack
 from gen.live import LiveStats
 from gen.pixel import sprite
-from gen.scenes.common import BLINK_CSS, HEADER_H, HEADER_W, header
+from gen.scenes.common import BLINK_CSS, HEADER_H, HEADER_W, MOBILE_W, header
 from gen.sprites.misc import ARROW, DOT, DOWN, ICONS, STAR
-from gen.svg import document, rect, text, text_width, wrap
+from gen.svg import balanced_wrap, document, rect, text, text_width, wrap
 
 W, H = 416, 196
 PAD = 24
@@ -43,22 +43,29 @@ def _card(q: Quest, lang: str) -> str:
                     fonts=("ps2p", "vt323"), bg=BG)
 
 
-def _title(lang: str) -> str:
+def _title(lang: str, width: int = HEADER_W) -> str:
     label = COPY[lang]["quests.title"]
-    return document(HEADER_W, HEADER_H, label, header(label), css=BLINK_CSS, fonts=("ps2p",))
+    return document(width, HEADER_H, label, header(label, width), css=BLINK_CSS,
+                    fonts=("ps2p",))
 
 
-def _more(lang: str) -> str:
+def _more(lang: str, width: int = 840) -> str:
+    """«▶ +N misiones más…» centrado; si no cabe en `width`, en líneas equilibradas bajo la flecha."""
     label = COPY[lang]["quests.more"].format(n=PROJECT_TOTAL - len(QUESTS))
-    w = 24 + text_width(label, "vt323", 22)
-    x0 = (840 - w) / 2
-    body = (sprite(ARROW[0], ARROW[1], x0, 16, 3)
-            + text(x0 + 24, 36, label, "vt323", 22, "#58a6ff", max_width=800))
-    return document(840, 56, label, body, fonts=("vt323",))
+    room = width - 2 * 20 - 24                       # 20 de margen a cada lado y la flecha
+    lines = balanced_wrap(label, "vt323", 22, room)
+    w = 24 + max(text_width(line, "vt323", 22) for line in lines)
+    x0 = (width - w) / 2
+    body = sprite(ARROW[0], ARROW[1], x0, 16, 3) + "".join(
+        text(x0 + 24, 36 + i * 26, line, "vt323", 22, "#58a6ff", max_width=room)
+        for i, line in enumerate(lines))
+    return document(width, 56 + (len(lines) - 1) * 26, label, body, fonts=("vt323",))
 
 
 def render(lang: str, live: LiveStats) -> dict[str, str]:
     out = {f"quest-{q.slug}.svg": _card(q, lang) for q in QUESTS}
     out["quests-title.svg"] = _title(lang)
     out["quests-more.svg"] = _more(lang)
+    out["m-quests-title.svg"] = _title(lang, MOBILE_W)
+    out["m-quests-more.svg"] = _more(lang, MOBILE_W)
     return out

@@ -30,6 +30,15 @@ se recalculan solas. El largo del pelo y el tono de piel son valores por defecto
 Cada bloque del README es una escena en `gen/scenes/` (hero, buttons, quests, sheet, achievements,
 inventory, highscore, footer).
 
+Variantes móviles: las escenas generan también `m-<nombre>.svg` (de momento hero, quests-title,
+quests-more y start) con 420 de ancho (`MOBILE_W` en `gen/scenes/common.py`) y la misma
+información, apilada o partida en líneas.
+En la cabecera, las dos maquetaciones son los `Layout` `DESKTOP` y `MOBILE` de `gen/scenes/hero.py`.
+`tests/fixtures/desktop_snapshot.json` guarda el sha256 de cada SVG de escritorio, así que un
+retoque móvil no puede cambiar el escritorio sin que falle un test. Si cambias el escritorio a
+propósito (un texto de `content.py`, por ejemplo), regenera el fixture y revisa el diff:
+`python3 -c "import tests.test_mobile as t; t.write_snapshot()"`.
+
 ## Comandos
 
 Todos se lanzan desde la raíz del repo.
