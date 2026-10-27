@@ -10,3 +10,10 @@ _COUNTS = [3, 0, 12, 7, 0, 0, 25, 143, 9, 4, 0, 18, 6, 2, 0,
 
 DAYS = [((_START + timedelta(days=i)).isoformat(), n) for i, n in enumerate(_COUNTS)]
 LIVE = compute_stats(DAYS)
+
+
+def days_with_current_streak(current: int, longest: int) -> list[tuple[str, int]]:
+    """Calendario cuya racha más larga es `longest` y cuya racha actual (hasta hoy) es `current`."""
+    counts = [2] * longest + [0] * 3 + [1] * current
+    start = date(2026, 1, 1)
+    return [((start + timedelta(days=i)).isoformat(), n) for i, n in enumerate(counts)]
