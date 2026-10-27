@@ -30,6 +30,9 @@ PITCH = CELL + GAP
 FRAME_Y = 56
 PAD = 24                    # del borde del lienzo al marcador (8 de marco + 16 de margen)
 SCORE_BASE = FRAME_Y + 40   # línea base del marcador
+# El marcador va en VT323: Press Start 2P dibuja É/Í con altura de minúscula («RéCORD 143/DíA»).
+SCORE_FONT, SCORE_SIZE = "vt323", 32
+SCORE_CAP = 0.56 * SCORE_SIZE   # altura de las mayúsculas (capHeight 560/1000 en el TTF)
 GRID_Y = SCORE_BASE + 14
 BOTTOM = 16 + 8             # bajo la rejilla: margen y marco
 SPRITE_SCALE = 2            # Pac-Man y fantasmas: 7 × 7 a escala 2 = 14, algo más que una celda
@@ -118,8 +121,8 @@ def _runners(path: _Path) -> tuple[str, str]:
     delays = []
     for k, color in enumerate(GHOSTS, 1):
         rows, gpal = ghost(color)
-        # a media altura de las mayúsculas del marcador (14 px en ps2p 16)
-        gx, gy = lineup_x + (k - 1) * GHOST_SPACING, SCORE_BASE - 7
+        # a media altura de las mayúsculas del marcador
+        gx, gy = lineup_x + (k - 1) * GHOST_SPACING, SCORE_BASE - round(SCORE_CAP / 2)
         svg.insert(0, f'<g class="run g{k}" transform="translate({gx} {gy})">'
                       f'<g class="face">{sprite(rows, gpal, -HALF, -HALF, SPRITE_SCALE)}</g></g>')
         # retraso negativo: en t = 0 cada fantasma está en el tramo final (oculto) de su vuelta
@@ -162,12 +165,12 @@ def render(lang: str, live: LiveStats) -> dict[str, str]:
     runners, runners_css = _runners(path)
     h = GRID_Y + DAYS * PITCH - GAP + BOTTOM
     score = (text(PAD, SCORE_BASE, c["hs.score"].format(total=fmt_int(live.total, lang)),
-                  "ps2p", 16, SCORE, max_width=SCORE_W)
+                  SCORE_FONT, SCORE_SIZE, SCORE, max_width=SCORE_W)
              + text(W - PAD, SCORE_BASE, c["hs.best"].format(n=fmt_int(live.best_day, lang)),
-                    "ps2p", 16, BEST, anchor="end", max_width=SCORE_W))
+                    SCORE_FONT, SCORE_SIZE, BEST, anchor="end", max_width=SCORE_W))
     body = header(c["hs.title"]) + _frame(h - FRAME_Y) + score + grid + runners
     title = c["alt.highscore"].format(total=fmt_int(live.total, lang),
                                       best=fmt_int(live.best_day, lang))
     svg = document(W, h, title, body, css=BLINK_CSS + grid_css + runners_css,
-                   fonts=("ps2p",), bg=BG)
+                   fonts=("ps2p", "vt323"), bg=BG)
     return {"highscore.svg": svg}

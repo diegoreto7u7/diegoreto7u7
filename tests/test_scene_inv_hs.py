@@ -63,6 +63,20 @@ class TestSceneHighscore(unittest.TestCase):
         self.assertIn(f"RÉCORD {LIVE.best_day}/DÍA", svg)
         self.assertEqual(svg.count('class="cell'), min(len(LIVE.days), 53 * 7))
 
+    def test_scoreboard_in_vt323_for_accented_capitals(self):
+        # Press Start 2P dibuja É/Í con altura de minúscula; VT323 tiene mayúsculas acentuadas de verdad
+        for lang in LANGS:
+            root = ET.fromstring(highscore.render(lang, LIVE)["highscore.svg"])
+            labels = {"1UP": None, "RÉCORD" if lang == "es" else "BEST": None}
+            for t in root.findall(".//{*}text"):
+                for k in labels:
+                    if t.text.startswith(k):
+                        labels[k] = t
+            for k, t in labels.items():
+                self.assertIsNotNone(t, (lang, k))
+                self.assertEqual(t.get("font-family"), "vt323", (lang, k))
+                self.assertGreaterEqual(float(t.get("font-size")), 26, (lang, k))
+
     def test_highscore_large_numbers_fit(self):
         big = LiveStats(days=LIVE.days, total=123456, best_day=9999, active_days=1,
                         window_days=1, current_streak=0, longest_streak=0)
