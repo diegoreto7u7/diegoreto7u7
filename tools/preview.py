@@ -1,12 +1,14 @@
 """Vista previa local del README con el renderizador real de GitHub y Chromium sin interfaz.
 
-    python3 tools/preview.py page [--lang es|en] [--width 830 358] [--theme light dark]
+    python3 tools/preview.py page [--lang es|en] [--width 830 358 276] [--theme light dark]
     python3 tools/preview.py frames assets/es/hero.svg 0 1 2.5 6 [--width 358] [--name hero]
                                    [--crop X Y W H] [--scale 2]
 
 `page` pasa README.md y README.en.md por `gh api markdown` (GFM con el contexto del repo), lo mete
 en una página con github-markdown-css y `<base href>` en la raíz del repo, y la captura entera en
 `preview/<lang>-<tema>-<ancho>.png`. Las imágenes son `<img>`: se ven en su primer fotograma.
+Anchos por defecto: 830 (escritorio), 358 y 276 (la columna real del README en la app y la web
+móvil de GitHub).
 
 `frames` mete el SVG en línea en un HTML, pausa todas sus animaciones en cada segundo pedido y
 captura `preview/<x>@<t>.png`. El tiempo `rm` captura el estado con movimiento reducido.
@@ -145,7 +147,8 @@ def main(argv=None) -> None:
     p = sub.add_parser("page", parents=[common], help="README entero con el renderizador de GitHub")
     p.add_argument("--lang", nargs="+", choices=sorted(READMES), default=["es", "en"])
     p.add_argument("--theme", nargs="+", choices=sorted(PAGE_BG), default=["light", "dark"])
-    p.add_argument("--width", nargs="+", type=int, default=[830, 358])
+    p.add_argument("--width", nargs="+", type=int, default=[830, 358, 276],
+                   help="anchos del cuadro del README en px (276 = columna de GitHub en el móvil)")
     p.set_defaults(run=page)
 
     f = sub.add_parser("frames", parents=[common], help="fotogramas de un SVG en los segundos pedidos")
