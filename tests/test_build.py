@@ -2,6 +2,8 @@ import re
 import shutil
 import tempfile
 import unittest
+from html import escape
+from html.parser import HTMLParser
 from unittest import mock
 from pathlib import Path
 
@@ -14,6 +16,16 @@ from gen.readme import render_readme
 
 def _copy_data(out: Path) -> None:
     shutil.copytree("data", out / "data")
+
+
+class _Imgs(HTMLParser):
+    def __init__(self):
+        super().__init__()
+        self.imgs = []
+
+    def handle_starttag(self, tag, attrs):
+        if tag == "img":
+            self.imgs.append(attrs)
 
 
 class BuildTests(unittest.TestCase):
@@ -76,10 +88,21 @@ class BuildTests(unittest.TestCase):
             self.assertIn(fmt_int(live.best_day, lang), joined)
             ach = [a for a in alts if "ogros" in a or "chievements" in a]
             self.assertTrue(ach)
-            from html import escape
             self.assertIn(escape(streak_text(lang, live), quote=True), ach[0])
         self.assertIn(fmt_int(live.total, "es"), render_readme("es"))
         self.assertIn(fmt_int(live.total, "en"), render_readme("en"))
+
+    def test_img_attributes_parse_cleanly(self):
+        for lang in LANGS:
+            md = render_readme(lang)
+            p = _Imgs()
+            p.feed(md)
+            self.assertEqual(len(p.imgs), md.count("<img"))
+            for attrs in p.imgs:
+                names = [k for k, _ in attrs]
+                self.assertLessEqual(set(names), {"src", "alt", "width", "height"})
+                self.assertEqual(len(names), len(set(names)))
+                self.assertTrue(dict(attrs).get("alt"))
 
     def test_build_fails_on_invalid_svg_and_writes_nothing(self):
         from gen.scenes import hero
