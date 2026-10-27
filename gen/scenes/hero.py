@@ -13,7 +13,7 @@ from gen.pixel import rects, two_frames
 from gen.scenes.common import BLINK_CSS
 from gen.sprites.misc import CAT, DOT, PLANT
 from gen.sprites.people import PEOPLE
-from gen.svg import document, text, text_width
+from gen.svg import document, escape, text, text_width
 
 W, H = 840, 400
 CYCLE, RESET, CAM_ON = 14.0, 13.5, 2.0
@@ -30,19 +30,20 @@ INK, PAPER, GREEN, BLUE = "#0d1117", "#f0f6fc", "#3fb950", "#79c0ff"
 YELLOW, GREY, LIGHT = "#e3b341", "#8b949e", "#c9d1d9"
 
 TERM_X, TERM_Y0, TERM_LH = 20, 166, 34
+VT323_REAL_ADVANCE = 0.4   # medido en el TTF; solo para colocar el cursor tras el texto
 # (clave, color del texto, segundo en que aparece; None = visible desde el fotograma 0)
 LINES = [("t1", BLUE, None), ("t2", LIGHT, None), ("t3", BLUE, 0.6), ("t4", YELLOW, 1.0),
          ("t5", BLUE, 1.4), ("t6", GREY, 2.0), ("t7", GREY, 2.4)]
 
-# (persona, escala, pies_y, x en reposo, sentido, segundos por cruce, color de la caja),
-# de la más lejana a la más cercana para que se solapen bien.
+# (persona, escala, pies_y, x en reposo, sentido, segundos por cruce, color de la caja,
+# confianza de la detección), de la más lejana a la más cercana para que se solapen bien.
+# Cada persona lleva su propia confianza, más baja cuanto más lejos está, como un detector real.
 WALKERS = [
-    (2, 3, 298, 534, -1, 17, "#d2a8ff"),
-    (3, 4, 326, 692, -1, 13, "#58a6ff"),
-    (1, 4, 346, 578, 1, 11, YELLOW),
-    (0, 5, 384, 420, 1, 9, GREEN),
+    (2, 3, 298, 534, -1, 17, "#d2a8ff", "0.71"),
+    (3, 4, 326, 692, -1, 13, "#58a6ff", "0.83"),
+    (1, 4, 346, 578, 1, 11, YELLOW, "0.88"),
+    (0, 5, 384, 420, 1, 9, GREEN, "0.94"),
 ]
-CONFIDENCE = "0.94"
 POSE_AT = 2.5  # segundo en que cada persona pasa por su posición de reposo
 
 
@@ -87,7 +88,7 @@ def _title_bar() -> str:
     dots = "".join(_r(20 + i * 18, 114, 12, 12, c)
                    for i, c in enumerate(("#ff5f56", "#ffbd2e", "#27c93f")))
     return (_r(8, BAR_TOP, 824, BODY_TOP - BAR_TOP, BAR) + dots
-            + text(80, 127, "diego@bilbao: ~", "vt323", 22, "#7d8590"))
+            + text(80, 127, "diego@bilbao", "vt323", 22, "#7d8590"))
 
 
 def _frame() -> str:
@@ -102,17 +103,21 @@ def _frame() -> str:
 
 
 def _line(y: int, s: str, color: str) -> tuple[str, float]:
-    """Una línea del terminal (prompt «$»/«>» y «OK» final en verde) y la x donde acaba."""
-    out, x = [], TERM_X
-    if s[:2] in ("$ ", "> "):
-        out.append(text(x, y, s[0], "vt323", 26, GREEN))
-        x, s = x + text_width(s[:2], "vt323", 26), s[2:]
-    ok = s.endswith(" OK")
-    body = s.removesuffix(" OK")
-    out.append(text(x, y, body, "vt323", 26, color, max_width=TERM_X1 - 8 - x))
-    if ok:
-        out.append(text(x + text_width(body + " ", "vt323", 26), y, "OK", "vt323", 26, GREEN))
-    return "".join(out), x + text_width(s, "vt323", 26)
+    """Una línea del terminal y la x donde acaba (con el avance real de la fuente).
+
+    Va en un solo <text>; el prompt «$»/«>» y el «OK» final son <tspan> en verde. Así el
+    navegador los coloca con el avance real de VT323 y no queda un hueco de más antes del «OK»
+    (ADVANCE lleva margen para comprobar que nada desborda, no para colocar).
+    """
+    el = text(TERM_X, y, s, "vt323", 26, color, max_width=TERM_X1 - 8 - TERM_X)
+    head, body, tail = "", s, ""
+    if body[:2] in ("$ ", "> "):
+        head, body = f'<tspan fill="{GREEN}">{escape(body[0])}</tspan> ', body[2:]
+    if body.endswith(" OK"):
+        body, tail = body.removesuffix(" OK"), f' <tspan fill="{GREEN}">OK</tspan>'
+    open_tag = el[:el.index(">") + 1]
+    return (f"{open_tag}{head}{escape(body)}{tail}</text>",
+            TERM_X + len(s) * VT323_REAL_ADVANCE * 26)
 
 
 def _terminal(lang: str) -> tuple[str, str]:
@@ -121,8 +126,9 @@ def _terminal(lang: str) -> tuple[str, str]:
     for i, (key, color, at) in enumerate(LINES):
         y = TERM_Y0 + i * TERM_LH
         svg, end = _line(y, COPY[lang][f"hero.{key}"], color)
-        if key == "t7":  # cursor █
-            svg += _r(round(end + 8), y - 19, 12, 22, GREEN, ' class="blink"')
+        if key == "t7":  # cursor █, un espacio después del texto
+            svg += _r(round(end + VT323_REAL_ADVANCE * 26), y - 19, 12, 22, GREEN,
+                      ' class="blink"')
         if at is None:
             body.append(svg)
             continue
@@ -134,8 +140,9 @@ def _terminal(lang: str) -> tuple[str, str]:
 
 
 def _walker(i: int, person: int, scale: int, feet: int, x: int, sense: int,
-            secs: int, color: str, label: str) -> tuple[str, str]:
+            secs: int, color: str, confidence: str, kind: str) -> tuple[str, str]:
     """Persona en su caja de detección; cruza la cámara entera y pasa por x en POSE_AT."""
+    label = f"{kind} {confidence}"   # «persona 0.94»
     a, b, pal = PEOPLE[person]
     if sense < 0:
         a, b = [r[::-1] for r in a], [r[::-1] for r in b]
@@ -182,11 +189,11 @@ def _camera(lang: str) -> tuple[str, str]:
     count = f'{c["hero.count"]} {len(WALKERS)}/40'
     count_w = round(text_width(count, "vt323", 22)) + 12
     sign_w = round(text_width(c["hero.nosignal"], "ps2p", 20)) + 40
-    label = f'{c["hero.person"]} {CONFIDENCE}'
+    kind = c["hero.person"]
 
     walkers, css = [], []
     for i, spec in enumerate(WALKERS):
-        svg, rule = _walker(i, *spec, label)
+        svg, rule = _walker(i, *spec, kind)
         walkers.append(svg)
         css.append(rule)
 

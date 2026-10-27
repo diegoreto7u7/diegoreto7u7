@@ -15,8 +15,14 @@ class TestSceneLinks(unittest.TestCase):
                                         "btn-cv.svg", "btn-lang.svg"})
             for svg in out.values():
                 self.assertEqual(check_svg(svg), [])
-                self.assertIn('viewBox="0 0 216 56"', svg)
+                self.assertIn('viewBox="0 0 192 56"', svg)
         self.assertIn("ESPAÑOL", buttons.render("en", LIVE)["btn-lang.svg"])
+
+    def test_buttons_two_per_row_on_mobile(self):
+        # en el README van a 48 px de alto; en un móvil el README mide 358 px de ancho y entre
+        # dos enlaces queda un espacio (unos 5 px)
+        shown = buttons.W * 48 / buttons.H
+        self.assertLessEqual(2 * shown + 5, 358)
 
     def test_only_portfolio_button_blinks(self):
         out = buttons.render("es", LIVE)

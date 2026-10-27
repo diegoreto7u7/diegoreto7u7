@@ -29,6 +29,13 @@ class FooterTests(unittest.TestCase):
         svg = footer.render("es", LIVE)["bilbao.svg"]
         self.assertIn(".shoot{opacity:0;", svg)
 
+    def test_hills_lighter_than_sky(self):
+        def lum(c):
+            return sum(int(c[i:i + 2], 16) * w for i, w in ((1, .2126), (3, .7152), (5, .0722)))
+        sky = max(lum(footer.PAL[k]) for k in "abcd")
+        self.assertGreater(lum(footer.PAL["i"]), sky * 1.3)      # Artxanda se lee como monte
+        self.assertGreater(lum(footer.PAL["h"]), lum(footer.PAL["i"]))   # cresta iluminada
+
     def test_start_text(self):
         self.assertIn("PRESS START TO GET IN TOUCH", footer.render("en", LIVE)["start.svg"])
         self.assertIn("PULSA START PARA HABLAR CONMIGO", footer.render("es", LIVE)["start.svg"])

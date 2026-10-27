@@ -7,7 +7,9 @@ from gen.scenes.common import BLINK_CSS
 from gen.sprites.misc import ARROW, DOWNLOAD, ENVELOPE, GLOBE, LINKEDIN_IN
 from gen.svg import document, text, text_width
 
-W, H, BEVEL, SCALE, GAP = 216, 56, 4, 3, 12
+# 192 de ancho: a 48 px de alto (como van en el README) miden 165 px y caben dos por fila en
+# un móvil de 358 px; con el texto más largo («PORTFOLIO») quedan 8 de aire a cada lado.
+W, H, BEVEL, SCALE, GAP = 192, 56, 4, 3, 12
 INK = "#0d1117"
 
 

@@ -56,13 +56,16 @@ _BASE = [
 ]
 
 # Antebrazo, puño acanalado, muñeca y mano (el pulgar hacia dentro); «.» deja ver la base.
+# La pulsera (eslabones de plata alternos) y la esfera del reloj (con una aguja blanca) ocupan
+# dos filas cada una: con una sola apenas se distinguían a 830 px.
 _HAND_BRACELET = [
     "gGGGg...",
     "gLGGGg..",
     ".gLGGGg.",
     "..gLGGGg",
     "..cgcgc.",
-    "..BbBBB.",
+    "..bBbBb.",
+    "..BaBaB.",
     "..SSSSSS",
     "..sSSSSs",
     "..SsSsS.",
@@ -74,6 +77,7 @@ _HAND_WATCH = [
     "gGGGLg..",
     ".cgcgc..",
     ".WwwwW..",
+    ".WwbwW..",
     "SSSSSS..",
     "sSSSSs..",
     ".SsSsS..",

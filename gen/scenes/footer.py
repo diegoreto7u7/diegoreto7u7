@@ -21,7 +21,8 @@ START_W, START_H = 840, 88
 
 PAL = {
     "a": "#0a0f1f", "b": "#0d1530", "c": "#111c3d", "d": "#16234a",
-    "h": "#122033", "i": "#17293f",
+    # montes de Artxanda: verde oscuro, más claro que el cielo para que se lean como monte
+    "h": "#3a6358", "i": "#28463f",
     "s": "#9aa7b4", "S": "#c9d1d9", "t": "#6e7b88", "T": "#4d5964",
     "w": "#0c2236", "x": "#123049",
     "q": "#30363d", "Q": "#21262d",

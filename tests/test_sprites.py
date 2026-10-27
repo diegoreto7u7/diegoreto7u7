@@ -50,6 +50,12 @@ class SpritesTest(unittest.TestCase):
         self.assertEqual(PALETTE["B"], "#c0c7d0"); self.assertEqual(PALETTE["H"], "#6b4423")
         self.assertEqual(PALETTE["S"], "#e8b48a"); self.assertEqual(PALETTE["b"], "#eef2f6")
 
+    def test_bracelet_and_watch_two_rows_tall(self):
+        # con una sola fila apenas se veían a 830 px
+        for fr in (AVATAR_A, AVATAR_B):
+            self.assertEqual(sum("B" in r for r in fr), 2)     # pulsera
+            self.assertEqual(sum("w" in r for r in fr), 2)     # esfera del reloj
+
     def test_avatar_frames_alternate_hands(self):
         def row(key, frame): return min(i for i, r in enumerate(frame) if key in r)
         self.assertLess(row("B", AVATAR_A), row("B", AVATAR_B))       # A: sube la mano de la pulsera

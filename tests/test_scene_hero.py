@@ -28,6 +28,26 @@ class TestSceneHero(unittest.TestCase):
         self.assertIn("NO SIGNAL", render("en", LIVE)["hero.svg"])
         self.assertIn("SIN SEÑAL", render("es", LIVE)["hero.svg"])
 
+    def test_each_person_has_its_own_confidence(self):
+        for lang in LANGS:
+            svg = render(lang, LIVE)["hero.svg"]
+            person = COPY[lang]["hero.person"]
+            for conf in ("0.94", "0.88", "0.71", "0.83"):
+                self.assertEqual(svg.count(f">{person} {conf}<"), 1, (lang, conf))
+
+    def test_title_bar_without_tilde(self):
+        # VT323 dibuja «~» como una «ᴺ» volada
+        svg = render("es", LIVE)["hero.svg"]
+        self.assertIn(">diego@bilbao<", svg)
+        self.assertNotIn("~", svg.split("<style>")[0] + svg.split("</style>")[1])
+
+    def test_ok_and_prompt_share_the_line_text(self):
+        # el «OK» va en el mismo <text> que su línea: sin hueco de más antes de él
+        root = ET.fromstring(render("es", LIVE)["hero.svg"])
+        texts = ["".join(t.itertext()) for t in root.findall(".//{*}text")]
+        self.assertIn("> modelo YOLO cargado... OK", texts)
+        self.assertIn("$ whoami", texts)
+
     def test_terminal_shows_every_line(self):
         for lang in LANGS:
             svg = render(lang, LIVE)["hero.svg"]
