@@ -41,7 +41,7 @@ class TestSceneLinks(unittest.TestCase):
     def test_summary_fits_two_lines(self):
         for lang in LANGS:
             for q in QUESTS:
-                self.assertLessEqual(len(wrap(q.summary[lang], "vt323", 22, 330)), 2)
+                self.assertLessEqual(len(wrap(q.summary[lang], "vt323", 22, quests.SUMMARY_W)), 2)
 
     def test_status_dot_colour_follows_in_progress(self):
         out = quests.render("es", LIVE)

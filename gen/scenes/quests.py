@@ -8,6 +8,7 @@ from gen.svg import document, text, text_width, wrap
 
 W, H = 416, 196
 PAD = 24
+SUMMARY_W = 352  # ancho del resumen; con avance 0.42 em caben 38 caracteres y sobran 30 px hasta el marco
 BG, LINE, INK = "#0d1117", "#f0f6fc", "#c9d1d9"
 GREY, GREEN, YELLOW = "#8b949e", "#3fb950", "#e3b341"
 BLINK_CSS = ".blink{animation:blink 1s steps(1) infinite}@keyframes blink{50%{opacity:0}}"
@@ -31,7 +32,7 @@ def _card(q: Quest, lang: str) -> str:
     body += text(tx, 48, title, "ps2p", 16, "#58a6ff", max_width=W - tx - PAD - 26)
     if q.starred:
         body += sprite(STAR[0], STAR[1], tx + text_width(title, "ps2p", 16) + 8, 32, 2)
-    inner = 330  # ancho de texto; deja aire hasta el borde interior
+    inner = SUMMARY_W
     for i, line in enumerate(wrap(q.summary[lang], "vt323", 22, inner)):
         body += text(PAD, 88 + i * 26, line, "vt323", 22, INK, max_width=inner)
     body += text(PAD, 142, quest_stack(q, lang), "vt323", 22, GREY, max_width=W - 2 * PAD)

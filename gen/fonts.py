@@ -9,7 +9,7 @@ CHARSET = (
     + "áéíóúñüÁÉÍÓÚÑÜ·¿¡«»—–"
 )
 MIN_SIZE = {"ps2p": 16, "vt323": 22}
-ADVANCE = {"ps2p": 1.0, "vt323": 0.4}
+ADVANCE = {"ps2p": 1.0, "vt323": 0.42}
 
 _FONTS_DIR = Path(__file__).resolve().parent.parent / "fonts"
 _FILES = {"ps2p": "press-start-2p.woff", "vt323": "vt323.woff"}
