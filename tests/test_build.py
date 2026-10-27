@@ -2,10 +2,12 @@ import re
 import shutil
 import tempfile
 import unittest
+from unittest import mock
 from pathlib import Path
 
 from gen.build import build, render_all
-from gen.content import LANGS
+from gen.content import LANGS, fmt_int
+from gen.scenes.achievements import streak_text
 from gen.live import load_live
 from gen.readme import render_readme
 
@@ -60,12 +62,37 @@ class BuildTests(unittest.TestCase):
                 self.assertIn(src[1], rendered)
 
     def test_alts_are_escaped_and_filled(self):
+        live = load_live(Path("data/live.json"), refresh=False, token=None)
         for lang in LANGS:
             md = render_readme(lang)
             self.assertNotRegex(md, r"\{[a-z]+\}")
-            for alt in re.findall(r'alt="([^"]*)"', md):
-                self.assertNotIn("<", alt)
+            alts = re.findall(r'alt="([^"]*)"', md)
+            for alt in alts:
                 self.assertTrue(alt)
+                self.assertNotIn("<", alt)
+                self.assertNotRegex(alt, r"&(?!(?:amp|lt|gt|quot|#\d+|#x[0-9a-f]+);)")
+            joined = "\n".join(alts)
+            self.assertIn(fmt_int(live.total, lang), joined)
+            self.assertIn(fmt_int(live.best_day, lang), joined)
+            ach = [a for a in alts if "ogros" in a or "chievements" in a]
+            self.assertTrue(ach)
+            from html import escape
+            self.assertIn(escape(streak_text(lang, live), quote=True), ach[0])
+        self.assertIn(fmt_int(live.total, "es"), render_readme("es"))
+        self.assertIn(fmt_int(live.total, "en"), render_readme("en"))
+
+    def test_build_fails_on_invalid_svg_and_writes_nothing(self):
+        from gen.scenes import hero
+        with tempfile.TemporaryDirectory() as d:
+            out = Path(d)
+            _copy_data(out)
+            bad = lambda lang, live: {"hero.svg": "<svg><script>x</script></svg>"}  # noqa: E731
+            with mock.patch.object(hero, "render", bad):
+                with self.assertRaises(SystemExit):
+                    build(out, refresh=False, token=None)
+            self.assertFalse((out / "README.md").exists())
+            self.assertFalse((out / "README.en.md").exists())
+            self.assertFalse((out / "assets").exists())
 
 
 if __name__ == "__main__":

@@ -7,7 +7,7 @@ from .content import COPY, PROJECT_TOTAL, QUESTS, URLS, fmt_int
 from .live import LiveStats, load_live
 from .scenes.achievements import streak_text
 
-DEFAULT_LIVE = Path("data/live.json")
+DEFAULT_LIVE = Path(__file__).resolve().parent.parent / "data" / "live.json"
 
 
 def _a(s: str) -> str:
@@ -19,6 +19,7 @@ def _quest_alt(q, lang: str) -> str:
 
 
 def render_readme(lang: str, live: LiveStats | None = None) -> str:
+    """Markdown del README; los llamadores de producción pasan `live`."""
     if live is None:
         live = load_live(DEFAULT_LIVE, refresh=False, token=None)
     c, u = COPY[lang], URLS[lang]
