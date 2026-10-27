@@ -36,7 +36,7 @@ def _card(q: Quest, lang: str) -> str:
         body += text(PAD, 88 + i * 26, line, "vt323", 22, INK, max_width=inner)
     body += text(PAD, 142, quest_stack(q, lang), "vt323", 22, GREY, max_width=W - 2 * PAD)
     status = q.status[lang]
-    dot = YELLOW if q.status["es"] == "En desarrollo" else GREEN
+    dot = YELLOW if q.in_progress else GREEN
     chip_w = 10 + 15 + 8 + text_width(status, "vt323", 22) + 10
     body += _rect(PAD, 152, chip_w, 28, "#21262d")
     body += sprite(DOT[0], {"A": dot}, PAD + 10, 159, 3)

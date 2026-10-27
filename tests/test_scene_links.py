@@ -42,3 +42,13 @@ class TestSceneLinks(unittest.TestCase):
         for lang in LANGS:
             for q in QUESTS:
                 self.assertLessEqual(len(wrap(q.summary[lang], "vt323", 22, 330)), 2)
+
+    def test_status_dot_colour_follows_in_progress(self):
+        out = quests.render("es", LIVE)
+        for slug, colour, other in [("nectum", "#e3b341", "#3fb950"),
+                                    ("smart-city-platform", "#e3b341", "#3fb950"),
+                                    ("conteobk", "#3fb950", "#e3b341"),
+                                    ("licitaciones", "#3fb950", "#e3b341")]:
+            svg = out[f"quest-{slug}.svg"]
+            self.assertIn(f'<rect x="37" y="159" width="9" height="3" fill="{colour}"/>', svg, slug)
+            self.assertNotIn(f'<rect x="37" y="159" width="9" height="3" fill="{other}"/>', svg, slug)

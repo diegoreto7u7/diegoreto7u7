@@ -24,6 +24,7 @@ class Quest:
     status: dict[str, str]
     starred: bool
     icon: str
+    in_progress: bool = False
 
 
 QUESTS: list[Quest] = [
@@ -52,7 +53,7 @@ QUESTS: list[Quest] = [
          "en": "A modular Rust ERP for sales, inventory and accounting."},
         "Rust · Axum · Tokio · SQLx",
         {"es": "En desarrollo", "en": "In development"},
-        False, "crab",
+        False, "crab", True,
     ),
     Quest(
         "smart-city-platform",
@@ -61,7 +62,7 @@ QUESTS: list[Quest] = [
          "en": "A platform connecting the services of a smart city."},
         "Go · PostGIS · NATS · MapLibre",
         {"es": "En desarrollo", "en": "In development"},
-        False, "city",
+        False, "city", True,
     ),
 ]
 
