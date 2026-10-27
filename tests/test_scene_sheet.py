@@ -3,7 +3,8 @@ import xml.etree.ElementTree as ET
 
 from gen.content import COPY, LANGS, SKILLS, fmt_int
 from gen.live import LiveStats, compute_stats
-from gen.scenes import achievements, sheet
+from gen.scenes import achievements, quests, sheet
+from gen.scenes.common import header
 from gen.scenes.sheet import segments
 from gen.svg import escape
 from gen.svgcheck import check_svg
@@ -53,6 +54,14 @@ class TestSceneSheet(unittest.TestCase):
             # la primera ya está en su sitio en t = 0; las demás entran deslizándose
             self.assertEqual(toasts[0].get("class"), "toast")
             self.assertTrue(all("slide" in g.get("class") for g in toasts[1:]))
+
+    def test_section_headers_share_one_style(self):
+        for lang in LANGS:
+            c = COPY[lang]
+            for svg, key in ((quests.render(lang, LIVE)["quests-title.svg"], "quests.title"),
+                             (sheet.render(lang, LIVE)["sheet.svg"], "sheet.title"),
+                             (achievements.render(lang, LIVE)["achievements.svg"], "ach.title")):
+                self.assertIn(header(c[key]), svg, key)
 
     def test_large_numbers_fit(self):
         big = LiveStats(days=LIVE.days, total=123456, best_day=9999, active_days=366,

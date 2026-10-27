@@ -7,15 +7,15 @@ con movimiento reducido se ve la ficha completa.
 from gen.content import COPY, SKILLS, fmt_int
 from gen.live import LiveStats
 from gen.pixel import rects, sprite, two_frames
+from gen.scenes.common import BLINK_CSS, header
 from gen.sprites.avatar import AVATAR_A, AVATAR_B, AVATAR_BLINK, PALETTE
-from gen.sprites.misc import ARROW, HEART_OFF, HEART_ON, MUG
+from gen.sprites.misc import HEART_OFF, HEART_ON, MUG
 from gen.svg import document, text, text_width, wrap
 
 W = 840
 BG, FRAME, TRACK = "#0d1117", "#30363d", "#21262d"
 PAPER, LIGHT, KEY = "#f0f6fc", "#c9d1d9", "#7d8590"
 GREEN, DARK_GREEN = "#3fb950", "#2ea043"
-BLINK_CSS = ".blink{animation:blink 1s steps(1) infinite}@keyframes blink{50%{opacity:0}}"
 
 PANEL_Y, PAD = 56, 28
 TOP = PANEL_Y + 24           # primera línea de contenido dentro del marco
@@ -47,13 +47,6 @@ def segments(pct: float) -> int:
 
 def _r(x, y, w, h, fill, extra="") -> str:
     return f'<rect x="{x}" y="{y}" width="{w}" height="{h}" fill="{fill}"{extra}/>'
-
-
-def header(label: str) -> str:
-    """Cabecera de sección: «▶» verde parpadeando, título en ps2p 20 y una línea debajo."""
-    return (sprite(ARROW[0], ARROW[1], 0, 15, 3, "blink")
-            + text(28, 34, label, "ps2p", 20, PAPER, max_width=W - 28)
-            + _r(0, 46, W, 2, FRAME))
 
 
 def _panel(h: int) -> str:

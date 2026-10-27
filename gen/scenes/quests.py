@@ -3,6 +3,7 @@
 from gen.content import COPY, PROJECT_TOTAL, QUESTS, Quest, quest_stack
 from gen.live import LiveStats
 from gen.pixel import sprite
+from gen.scenes.common import BLINK_CSS, HEADER_H, HEADER_W, header
 from gen.sprites.misc import ARROW, DOT, DOWN, ICONS, STAR
 from gen.svg import document, text, text_width, wrap
 
@@ -11,7 +12,6 @@ PAD = 24
 SUMMARY_W = 352  # ancho del resumen; con avance 0.42 em caben 38 caracteres y sobran 30 px hasta el marco
 BG, LINE, INK = "#0d1117", "#f0f6fc", "#c9d1d9"
 GREY, GREEN, YELLOW = "#8b949e", "#3fb950", "#e3b341"
-BLINK_CSS = ".blink{animation:blink 1s steps(1) infinite}@keyframes blink{50%{opacity:0}}"
 
 
 def _rect(x, y, w, h, fill) -> str:
@@ -49,10 +49,7 @@ def _card(q: Quest, lang: str) -> str:
 
 def _title(lang: str) -> str:
     label = COPY[lang]["quests.title"]
-    body = (sprite(ARROW[0], ARROW[1], 0, 10, 4, "blink")
-            + text(32, 34, label, "ps2p", 24, "#f0f6fc", max_width=800)
-            + _rect(0, 48, 840, 2, "#30363d"))
-    return document(840, 56, label, body, css=BLINK_CSS, fonts=("ps2p",))
+    return document(HEADER_W, HEADER_H, label, header(label), css=BLINK_CSS, fonts=("ps2p",))
 
 
 def _more(lang: str) -> str:

@@ -3,12 +3,12 @@
 from gen.content import COPY
 from gen.live import LiveStats
 from gen.pixel import sprite
+from gen.scenes.common import BLINK_CSS
 from gen.sprites.misc import ARROW, DOWNLOAD, ENVELOPE, GLOBE, LINKEDIN_IN
 from gen.svg import document, text, text_width
 
 W, H, BEVEL, SCALE, GAP = 216, 56, 4, 3, 12
 INK = "#0d1117"
-BLINK_CSS = ".blink{animation:blink 1s steps(1) infinite}@keyframes blink{50%{opacity:0}}"
 
 
 def _light(hex_color: str) -> str:

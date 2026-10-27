@@ -10,6 +10,7 @@ import random
 from gen.content import COPY
 from gen.live import LiveStats
 from gen.pixel import rects, two_frames
+from gen.scenes.common import BLINK_CSS
 from gen.sprites.misc import CAT, DOT, PLANT
 from gen.sprites.people import PEOPLE
 from gen.svg import document, text, text_width
@@ -239,8 +240,7 @@ def _cat() -> str:
     return rects(CAT[0], CAT[1], x, y, 3) + zs
 
 
-CSS = (
-    ".blink{animation:blink 1s steps(1) infinite}@keyframes blink{50%{opacity:0}}"
+CSS = BLINK_CSS + (
     ".z{animation:zz 3s linear infinite}.z1{animation-delay:-1.5s}"
     "@keyframes zz{0%{opacity:0;transform:translate(-4px,10px)}30%{opacity:1}"
     "100%{opacity:0;transform:translate(6px,-12px)}}"

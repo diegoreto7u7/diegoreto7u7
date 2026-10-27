@@ -7,7 +7,7 @@ t = 0. Después los trofeos destellan en bucle. El estado base es el final (toda
 from gen.content import COPY, fmt_int
 from gen.live import LiveStats, streak_badge
 from gen.pixel import rects
-from gen.scenes.sheet import BLINK_CSS, header
+from gen.scenes.common import BLINK_CSS, header
 from gen.sprites.misc import TROPHY
 from gen.svg import document, text
 
